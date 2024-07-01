@@ -86,12 +86,17 @@ process_csv <- function(folder, file_name) {
                 passages <- c("A", "B", "C", "D")
                 columns <- list(c(2, 3), c(4, 5), c(6, 7), c(8, 9))  # Utiliser des indices de colonne
                 
-                EDR_min = 0.1
-                EDR_max = 10
                 
                 #on crée une liste de dataframes pour chaque passage
                 EDR_passage_data_list  <- list()
+                HR_passage_data_list  <- list()
                 
+                # Temporairement on met EDR_min, EDR_max, HR_min et HR_max à des valeurs extrêmes
+                EDR_min = 10
+                EDR_max = 0.1
+                HR_min = 200
+                HR_max = 50
+
                 for (i in 1:4) {
                   passage <- passages[i]
                   print(passage)
@@ -134,6 +139,8 @@ process_csv <- function(folder, file_name) {
                       passage_data$V1 <- as.POSIXct(strptime(passage_data$V1, format = "%H:%M:%S", tz = "GMT"))
                     }
                     
+                    # Créer un graphique pour chaque passage
+
                     plot_data <- data.frame(
                       Time = passage_data$V1,
                       Pulse = passage_data$V2
@@ -162,6 +169,7 @@ process_csv <- function(folder, file_name) {
                       theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
                       scale_y_continuous(limits = y_lim, breaks = y_breaks)
                     
+                    # Ajouter une ligne rouge en pointillés à 0.1 pour EDA
                     if (file_name == "EDA") {
                       p <- p + geom_hline(yintercept = 0.1, linetype = "dashed", color = "red")
                     }
@@ -170,18 +178,16 @@ process_csv <- function(folder, file_name) {
                     ggsave(filename = file.path(participant_folder, paste0(passage, "_pulse_plot.png")),
                            plot = p, width = 10, height = 5, units = "in")
                     
-                    # On met à jour EDR_min et EDR_max
+                    # On met à jour EDR_min, EDR_max, HR_min et HR_max
                     if (file_name == "EDA") {
                       EDR_min = min(EDR_min, min(passage_data$V2))
                       EDR_max = max(EDR_max, max(passage_data$V2))
                       EDR_passage_data_list[[i]] <- passage_data_csv
                     }
-                    else {
-                      names(passage_data_csv)[names(passage_data) == 'V1'] <- 'Time'
-                      names(passage_data_csv)[names(passage_data) == 'V2'] <- 'HR'
-                      names(passage_data_csv)[names(passage_data) == 'V3'] <- 'Variation coefficient'
-                      
-                      write.table(passage_data_csv, file = file.path(participant_folder, paste0(passage, "_HR.csv")), row.names = FALSE, sep = ";", col.names = TRUE)
+                    else if (file_name == "HR") {
+                      HR_min = min(HR_min, min(passage_data$V2))
+                      HR_max = max(HR_max, max(passage_data$V2))
+                      HR_passage_data_list[[i]] <- passage_data_csv
                     }
                     
                     #cat(paste("\nSaved participant", participant, file_name, "data for", "passage", passage))
@@ -203,6 +209,19 @@ process_csv <- function(folder, file_name) {
                     names(EDR_passage_data)[names(EDR_passage_data) == 'V4'] <- 'Standardized EDA'
                     
                     write.table(EDR_passage_data, file = file.path(participant_folder, paste0(passage, "_EDA.csv")), row.names = FALSE, sep = ";", col.names = TRUE)
+                  }
+                  else if (file_name == "HR") {
+                    HR_passage_data <- HR_passage_data_list[[i]]
+                    HR_passage_data$V4 <- (HR_passage_data$V2 - HR_min) / (HR_max - HR_min)
+                    print(HR_min)
+                    print(HR_max)
+                    
+                    names(HR_passage_data)[names(HR_passage_data) == 'V1'] <- 'Time'
+                    names(HR_passage_data)[names(HR_passage_data) == 'V2'] <- 'HR'
+                    names(HR_passage_data)[names(HR_passage_data) == 'V3'] <- 'Variation coefficient'
+                    names(HR_passage_data)[names(HR_passage_data) == 'V4'] <- 'Standardized HR'
+                      
+                    write.table(HR_passage_data, file = file.path(participant_folder, paste0(passage, "_HR.csv")), row.names = FALSE, sep = ";", col.names = TRUE)
                   }
                 }
               } else {
