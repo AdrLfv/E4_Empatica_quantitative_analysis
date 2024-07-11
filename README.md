@@ -1,4 +1,8 @@
-variation and preparing the data for analysis.
+# Process and Draw Graphs
+
+The program `process_and_draw_graphs.R`, is specifically designed to handle data from various sessions of an experiment, focusing on processing heart rate (HR) data, calculating its coefficient of variation, and processing Electrodermal Activity (EDA) and accelerometer (ACC) data. It aims to synchronize all collected data by aligning the first timestamp found in "tags.csv" with timestamps in "videos_timecodes.csv" and each E4 data stream file's timestamp.
+
+## Features
 
 - **Data Synchronization**: It synchronizes the experiment data with video recordings by matching the first timestamp in "tags.csv" with corresponding timestamps in "videos_timecodes.csv" and the timestamps in each E4 data stream file. This ensures that the data from different sources are aligned for accurate analysis.
 
