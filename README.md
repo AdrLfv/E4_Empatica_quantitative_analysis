@@ -29,4 +29,4 @@ The program relies on the following R packages:
 - **readr**: For reading data from various file formats.
 - **stats**: For performing statistical tests, including the Wilcoxon test.
 
-This automation follows the guidelines provided by Empatica on their support site for session start time format and synchronization.
+This automation follows the guidelines provided by Empatica on their [support site](https://support.empatica.com/hc/en-us/articles/202800715-Session-start-time-format-and-synchronization) for session start time format and synchronization.
