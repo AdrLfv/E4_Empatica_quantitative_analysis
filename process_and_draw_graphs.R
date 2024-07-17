@@ -347,9 +347,10 @@ process_ACC <- function(folder) {
           #We create a list of dataframas for each session
           participant_order <- participant_info[participant_info$ID == participant, "Order"]
           
-          (i in 1:length(sessions)) {
+          for (i in 1:length(sessions)) {
             session <- sessions[i]
             print(session)
+            
             start_col <- columns[[i]][1]
             end_col <- columns[[i]][2]
             
@@ -371,12 +372,14 @@ process_ACC <- function(folder) {
             matching_end_index <- which(data$V6 == timecode_end_passage)[1]
             time_sequence <- seq(from = timestamp_video, by = 1/data[2, 1], length.out = matching_end_index - matching_start_index + 1)
             time_sequence_formatted <- format(time_sequence, "%H:%M:%S")
-            
+
             # V1 = Time, V2 = HR
             if (length(matching_start_index) > 0 & length(matching_end_index) > 0) {
               passage_data <- data.frame(
                 V1 = time_sequence_formatted,
-                V2 = (abs(data$V1[matching_start_index:matching_end_index]) + abs(data$V2[matching_start_index:matching_end_index]) + abs(data$V3[matching_start_index:matching_end_index]))/3
+                V2 = data$V1[matching_start_index:matching_end_index],
+                V3 = data$V2[matching_start_index:matching_end_index],
+                V4 = data$V3[matching_start_index:matching_end_index]
               )
               passage_data_csv <- passage_data
               
@@ -384,13 +387,14 @@ process_ACC <- function(folder) {
               if (any(is.na(passage_data$V1))) {
                 passage_data$V1 <- as.POSIXct(strptime(passage_data$V1, format = "%H:%M:%S", tz = "GMT"))
               }
+
+              mean_ACC <- (sqrt(passage_data$V2^2 + passage_data$V3^2 + passage_data$V4^2))
               
               plot_data <- data.frame(
                 Time = passage_data$V1,
-                Acceleration = passage_data$V2  # Acceleration 'Acceleration' Correction '
+                Acceleration = mean_ACC  # Acceleration 'Acceleration' Correction '
               )
 
-              
               if (file_name == "ACC") {
                 title = "Acceleration over Time"
                 y_lim <- c(ACC_y_lim_min, ACC_y_lim_max)
@@ -431,7 +435,7 @@ process_ACC <- function(folder) {
               } else if (session_number == 4) {
                 session_number_in_letters <- "fourth"
               }
-              substr(participant_order, i, i)
+              #substr(participant_order, i, i)
               # Création d'un graphique pour le session concerné
               p <- ggplot(plot_data, aes(x = Time, y = Acceleration)) +
                 geom_line(color=plot_color) +
@@ -446,8 +450,10 @@ process_ACC <- function(folder) {
                      plot = p, width = 10, height = 5, units = "in")
               
               names(passage_data_csv)[names(passage_data) == 'V1'] <- 'Time'
-              names(passage_data_csv)[names(passage_data) == 'V2'] <- 'ACC'
-              
+              names(passage_data_csv)[names(passage_data) == 'V2'] <- 'ACC_x'
+              names(passage_data_csv)[names(passage_data) == 'V3'] <- 'ACC_y'
+              names(passage_data_csv)[names(passage_data) == 'V4'] <- 'ACC_z'
+
               write.table(passage_data_csv, file = file.path(participant_folder, paste0(session, "_ACC.csv")), row.names = FALSE, sep = ";", col.names = TRUE)
               
               #cat(paste("\nSaved participant", participant, file_name, "data for", "session", session))
@@ -473,14 +479,14 @@ process_ACC <- function(folder) {
 for (folder in stream_folders) {
   participant <- substr(basename(folder), 1, 3)
   
-  cat(paste("\nProcessing", participant, "HR data"))
-  process_HR_EDA(folder, "HR")
+  #cat(paste("\nProcessing", participant, "HR data"))
+  #process_HR_EDA(folder, "HR")
   
   # cat(paste("\nProcessing", participant, "EDA data"))
   # eda_data <- process_HR_EDA(folder, "EDA")
   
-  # cat(paste("\nProcessing", participant, "accelerometer data"))
-  # eda_data <- process_ACC(folder)
+  cat(paste("\nProcessing", participant, "accelerometer data"))
+  eda_data <- process_ACC(folder)
 }
 
 cat("\nDone!")

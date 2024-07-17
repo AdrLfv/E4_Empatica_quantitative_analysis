@@ -1,3 +1,5 @@
 calculate_mean_hr_variation_familiarity.R
 prepare_wilcoxon_data.R
 wilcoxon_test.R
+friedman_familiarity_HR.r
+kruskal_wallis_familiarity_HR.r
