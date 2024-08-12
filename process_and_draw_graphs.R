@@ -224,14 +224,17 @@ process_HR_EDA <- function(folder, file_name) {
                 
                 # Creation of a graph for the variation coefficient
                 p_variation <- ggplot(plot_data_variation, aes(x = Time, y = VariationCoefficient)) +
-                  geom_line(color=plot_color) +
+                  geom_line(color = plot_color) +
+                  geom_hline(yintercept = 0, color = "red", linetype = "dashed") +  # Ligne rouge en pointillés à y=0
+                  geom_ribbon(aes(ymin = pmin(VariationCoefficient, 0), ymax = 0), fill = "red", alpha = 0.2) +  # Zone rouge pour les valeurs négatives
+                  geom_ribbon(aes(ymin = 0, ymax = pmax(VariationCoefficient, 0)), fill = "green", alpha = 0.2) +  # Zone verte pour les valeurs positives
                   labs(title = paste("HR variation coefficient over Time - participant", participant, "-", session_number_in_letters, "session", "-", session),
-                       x = "Time (hh:mm:ss)",
-                       y = "Variation Coefficient") +
+                      x = "Time (hh:mm:ss)",
+                      y = "Variation Coefficient") +
                   scale_x_datetime(date_labels = "%H:%M:%S", date_breaks = "10 sec") +
                   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
                   scale_y_continuous(limits = y_lim_variation, breaks = y_breaks_variation)
-                # scale_y_continuous(breaks = seq(0, max(plot_data_variation$VariationCoefficient, na.rm = TRUE), by = 1))
+
                 
                 # Graphic backup
                 ggsave(filename = file.path(participant_folder, paste0(session, "_variation_coefficient_plot.png")),
@@ -422,8 +425,8 @@ process_ACC <- function(folder) {
                 print("Participant not found in participants.csv")
                 print(participant)
                 print(session)
-              }
-              # Calcul du numero de session
+              }#
+              # Calcul du numero de session#
               char_list <- strsplit(participant_order, split = "")[[1]]
               session_number <- which(char_list == session)
               if (session_number == 1) {
@@ -479,14 +482,14 @@ process_ACC <- function(folder) {
 for (folder in stream_folders) {
   participant <- substr(basename(folder), 1, 3)
   
-  #cat(paste("\nProcessing", participant, "HR data"))
-  #process_HR_EDA(folder, "HR")
+  cat(paste("\nProcessing", participant, "HR data"))
+  process_HR_EDA(folder, "HR")
   
   # cat(paste("\nProcessing", participant, "EDA data"))
   # eda_data <- process_HR_EDA(folder, "EDA")
   
-  cat(paste("\nProcessing", participant, "accelerometer data"))
-  eda_data <- process_ACC(folder)
+  #cat(paste("\nProcessing", participant, "accelerometer data"))
+  #eda_data <- process_ACC(folder)
 }
 
 cat("\nDone!")
