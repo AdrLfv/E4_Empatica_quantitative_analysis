@@ -32,7 +32,7 @@ for (participant_folder in stream_folders) {
     participant_info <- participants %>% filter(ID == participant_id)
 
     for (i in 1:4) {
-        session_data <- get_hr_data(participant_folder, session_order[i])
+        session_data <- get_hr_data(participant_folder, session_order[i]) %>% head(60)
         familiarity_letter <- substr(participant_info$Familiarity, i, i)
 
         if (familiarity_letter == "S") {
@@ -60,25 +60,41 @@ for (participant_folder in stream_folders) {
     }
 }
 
-hr_data_summary <- global_data %>%
+hr_data_summary_mean <- global_data %>%
     group_by(Familiarity) %>%
-    # summarise(HRV = sd(Variation.coefficient, na.rm = TRUE))
     summarise(HRV = mean(Variation.coefficient, na.rm = TRUE))
+
+print(hr_data_summary_mean)
+
+hr_data_summary_sd <- global_data %>%
+    group_by(Familiarity) %>%
+    summarise(HRV = sd(Variation.coefficient, na.rm = TRUE))
+
+print(hr_data_summary_sd)
 
 # Define the order and colors for the bars
 familiarity_levels <- c("Stranger", "Heard of", "Met", "Acquaintance", "Friend", "Relative", "Self")
-familiarity_colors <- c("red", "orangered", "orange", "gold", "yellow", "yellowgreen", "green3")
+# familiarity_colors <- c("red", "orangered", "orange", "gold", "yellow", "yellowgreen", "green3")
 
-# Create the bar plot
-p <- ggplot(hr_data_summary, aes(x= factor(Familiarity, levels = familiarity_levels), y = HRV, fill = factor(Familiarity, levels = familiarity_levels))) +
-    geom_bar(stat = "identity", position = "dodge", alpha = 0.7) +
-    scale_fill_manual(values = familiarity_colors) +
-    labs(title = "Mean Heart Rate Variation by Familiarity",
-    # labs(title = "Standard deviation of Heart Rate Variation by Familiarity",
-         x = "Familiarity Level",
-         y = "Heart Rate Variation") +
-    theme(axis.text.x = element_text(angle = 90, hjust = 1))
+# Ensure 'Session' has the desired order
+hr_data_long <- global_data %>%
+    pivot_longer(cols = c(Variation.coefficient),
+                 names_to = "Condition",
+                 values_to = "HR_variation") %>%
+    mutate(Condition = factor(Condition, levels = c("Variation.coefficient"), labels = c("Heart Rate Coefficient of Variation")),
+        Familiarity = factor(Familiarity, levels = familiarity_levels))
+
+# Create the box plot
+p_boxplot_all <- ggplot(hr_data_long, aes(x = factor(Familiarity, levels = familiarity_levels), y = HR_variation, fill = factor(Familiarity, levels = familiarity_levels))) +
+    geom_boxplot(alpha = 0.7) +
+    geom_jitter(width = 0.2, alpha = 0.5) +
+    labs(
+            x = "Familiarity",
+            y = "Heart Rate Variation",
+            fill = "Familiarity"
+        ) +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+    scale_fill_brewer(palette = "Set3")  # Utiliser une palette de couleurs prédéfinie
 
 # Save the plot locally
-# ggsave("D:/MIT project/2024_06 E4 Data/hrv_sd_familiarity_box_plot.png", plot=p, width = 10, height = 6)
-ggsave("D:/MIT project/2024_06 E4 Data/hrv_mean_familiarity_box_plot.png", plot=p, width = 10, height = 6)
+ggsave("D:/MIT project/2024_06 E4 Data/hrv_familiarity_box_plot.png", plot = p_boxplot_all, width = 10, height = 6)

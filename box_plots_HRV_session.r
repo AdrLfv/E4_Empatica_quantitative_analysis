@@ -61,5 +61,3 @@ for (session_name in sessions) {
     # Sauvegarder le box plot en tant qu'image PNG
     ggsave(file.path(combined_data_path, paste0("boxplot_", session_name, ".png")), plot = p, width = 8, height = 6)
 }
-
-

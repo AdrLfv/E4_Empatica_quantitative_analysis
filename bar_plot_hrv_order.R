@@ -19,7 +19,7 @@ get_hr_data <- function(participant_folder, session) {
     file_path <- file.path(participant_folder, "HR", paste0(session, "_HR.csv"))
     if (!file.exists(file_path)) return(NULL)
     data <- read.csv(file_path, header = TRUE, stringsAsFactors = FALSE, sep = ";")
-    data <- data %>% select(Variation.coefficient) %>% head(60)
+    data <- data %>% select(Variation.coefficient) 
     return(data)
 }
 
@@ -34,7 +34,7 @@ for (participant_folder in stream_folders) {
     
     for (i in 1:4) {
         session <- substr(participant_order, i, i)
-        session_data <- get_hr_data(participant_folder, session)
+        session_data <- get_hr_data(participant_folder, session) %>% head(60)
         if (!is.null(session_data)) {
             session_data$Session <- i
             hr_data <- rbind(hr_data, session_data)
@@ -43,20 +43,35 @@ for (participant_folder in stream_folders) {
 }
 
 # On résume les données pour avoir la moyenne de la variation du rythme cardiaque par session
-hr_data_summary <- hr_data %>%
+hr_data_summary_mean <- hr_data %>%
     group_by(Session) %>%
-    summarise(HR_variation = mean(Variation.coefficient, na.rm = TRUE))
-    # summarise(HR_variation = sd(Variation.coefficient, na.rm = TRUE))
+    summarise(HR_variation_mean = mean(Variation.coefficient, na.rm = TRUE))
+
+hr_data_summary_sd <- hr_data %>%
+    group_by(Session) %>%
+    summarise(HR_variation_sd = sd(Variation.coefficient, na.rm = TRUE))
 
 # Create the bar plot
-p <- ggplot(hr_data_summary, aes(x=factor(Session), y = HR_variation, fill = factor(Session))) +
+p_mean <- ggplot(hr_data_summary_mean, aes(x=factor(Session), y = HR_variation_mean, fill = factor(Session))) +
     geom_bar(stat="identity", position = "dodge", alpha = 0.7) +
-    labs(title = "Mean Heart Rate Variation by order of sessions",
-    # labs(title = "Standard deviation of Heart Rate Variation by order of sessions",
-         x = "Session",
-         y = "Mean Heart Rate Variation") +
-    theme(axis.text.x = element_text(angle = 90, hjust = 1))
+    labs(
+            x = "Session",
+            y = "Mean Heart Rate Variation",
+            fill = "Session" 
+        ) + 
+    theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+    scale_fill_brewer(palette = "YlGnBu")  # Utiliser une palette de couleurs prédéfinie
+
+p_sd <- ggplot(hr_data_summary_sd, aes(x=factor(Session), y = HR_variation_sd, fill = factor(Session))) +
+    geom_bar(stat="identity", position = "dodge", alpha = 0.7) +
+    labs(
+            x = "Session",
+            y = "Mean Heart Rate Variation",
+            fill = "Session" 
+        ) + 
+    theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+    scale_fill_brewer(palette = "YlGnBu")  # Utiliser une palette de couleurs prédéfinie
 
 # Sauvegarder le graphique en local
-ggsave("D:/MIT project/2024_06 E4 Data/mean_hrv_order_barplot.png", plot=p, width = 10, height = 6)
-# ggsave("D:/MIT project/2024_06 E4 Data/sd_hrv_order_barplot.png", plot=p, width = 10, height = 6)
+ggsave("D:/MIT project/2024_06 E4 Data/hrv_mean_session_barplot.png", plot=p_mean, width = 10, height = 6)
+ggsave("D:/MIT project/2024_06 E4 Data/hrv_sd_session_barplot.png", plot=p_sd, width = 10, height = 6)

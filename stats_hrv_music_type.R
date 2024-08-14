@@ -8,7 +8,7 @@ stream_folders <- list.dirs(base_path, recursive = FALSE)
 
 get_mean_var_coeff <- function(file_path) {
   data_file <- read.csv(file_path, header = TRUE, stringsAsFactors = FALSE, sep = ";")
-  coeff_var_data <- data_file %>% select(Variation.coefficient) %>% head(60)
+  coeff_var_data <- data_file %>% select(Variation.coefficient)
   
   # Calculer la moyenne et la variance
   mean_value <- mean(coeff_var_data$Variation.coefficient)
@@ -38,7 +38,7 @@ for (participant_folder in stream_folders) {
     # si la session in c("A", "B") le group est "calm" sinon "dynamic"
     session_group <- ifelse(session %in% c("A", "B"), "Calm", "Dynamic")
     if (file.exists(file_path)) {
-      session_results <- get_mean_var_coeff(file_path)
+      session_results <- get_mean_var_coeff(file_path) %>% head(60)
       results <- results %>% add_row(
         Group = session_group,
         Mean = session_results[1],

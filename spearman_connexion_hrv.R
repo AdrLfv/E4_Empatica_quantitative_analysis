@@ -6,7 +6,6 @@ library(ggsignif)
 library(Hmisc)
 library(ggplot2)
 
-source("D:/MIT project/E4_quantitative_analysis/standardize_ACC.R")
 
 base_path <- "D:/MIT project/2024_06 E4 Data/Cleaned data"
 stream_folders <- list.dirs(base_path, recursive = FALSE)
@@ -17,7 +16,7 @@ get_hr_data <- function(participant_folder, session) {
     if (!file.exists(file_path)) return(NULL)
     data <- read.csv(file_path, header = TRUE, stringsAsFactors = FALSE, sep = ";")
     # data <- data %>% select(Variation.coefficient) %>% head(60)
-    data <- data %>% select(Variation.coefficient) %>% head(60)
+    data <- data %>% select(Variation.coefficient)
     return(data)
 }
 
@@ -28,9 +27,10 @@ for (participant_folder in stream_folders) {
     if (participant_id %in% c("P05", "P06", "P07", "P11", "P24", "P26")) {
         next
     }
+    print(participant_id)
     connection <- participant_data %>% filter(ID == participant_id) %>% select(Connection) %>% pull()
     
-    session_data <- get_hr_data(participant_folder, "A")
+    session_data <- get_hr_data(participant_folder, "A") %>% head(60)
     if (!is.null(session_data)) {
         session_data$Participant <- participant_id
         session_data$Connection <- connection

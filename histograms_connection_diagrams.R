@@ -41,10 +41,11 @@ data_A_long <- data_A %>%
 ggplot(data_A_long, aes(x = factor(ID), y = Connection, fill = Condition)) +
   geom_bar(stat = "identity", position = position_dodge(width = 0.8), alpha = 0.7) +
   scale_fill_manual(values = c("Before" = "blue", "After" = "red"), name = "Condition") +
-  labs(title = "Histogram of Felt Connection (Session A)",
+  labs(#title = "Histogram of Felt Connection (Session A)",
        x = "Participant ID",
        y = "Connection Level") +
-  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  scale_fill_brewer(palette = "Set1")
 ggsave("D:/MIT project/2024_06 E4 Data/connection_histogram_A.png", width = 10, height = 6)
 
 # Sélectionner les colonnes nécessaires pour les sessions B
@@ -64,9 +65,10 @@ data_B_long <- data_B %>%
 ggplot(data_B_long, aes(x = factor(ID), y = Connection, fill = Condition)) +
   geom_bar(stat = "identity", position = position_dodge(width = 0.8), alpha = 0.7) +
   scale_fill_manual(values = c("Before" = "blue", "After" = "red"), name = "Condition") +
-  labs(title = "Histogram of Felt Connection (Session B)",
+  labs(#title = "Histogram of Felt Connection (Session B)",
        x = "Participant ID",
        y = "Connection Level") +
-  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  scale_fill_brewer(palette = "Set1")
 ggsave("D:/MIT project/2024_06 E4 Data/connection_histogram_B.png", width = 10, height = 6)
 

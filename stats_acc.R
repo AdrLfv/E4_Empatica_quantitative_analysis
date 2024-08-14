@@ -6,7 +6,7 @@ library(ggsignif)
 library(Hmisc)
 library(ggplot2)
 
-source("D:/MIT project/E4_quantitative_analysis/standardize_ACC.R")
+source("D:/MIT project/E4_quantitative_analysis/center_ACC.R")
 
 base_path <- "D:/MIT project/2024_06 E4 Data/Cleaned data"
 stream_folders <- list.dirs(base_path, recursive = FALSE)
@@ -21,15 +21,15 @@ for (participant_folder in stream_folders) {
     # print(participant_id)
     # sums_list <- list()
     for (i in 1:4) {
-        session_acc <- normalise_ACC(participant_folder, sessions[i]) %>% head(60*32) %>% pull()
+        session_acc <- center_ACC(participant_folder, sessions[i]) %>% head(60*32) %>% pull()
         # somme de la valuer absolue de toutes les valeurs de l'accélération
         # mean_acc_cumul <- mean_acc_cumul + sum(abs(session_acc))/length(session_acc)  
         # sums_list[[i]] <- sum(abs(session_acc))/(length(session_acc)*100)
-        # standard_deviation <- sd(session_acc)
-        # cat(standard_deviation, ";")
-        global_data <- rbind(global_data, data.frame(Participant = participant_id, Session = sessions[i], ACC = session_acc))
+        standard_deviation <- sd(session_acc)
+        cat(standard_deviation, ";")
+        # global_data <- rbind(global_data, data.frame(Participant = participant_id, Session = sessions[i], ACC = session_acc))
     }
-    # print("\n")
+    print("\n")
     # for (i in 1:4) {
     #     cat(sums_list[[i]], ";", sep="")
     # }
@@ -38,7 +38,7 @@ for (participant_folder in stream_folders) {
 }
 
 # Afficher la moyenne golbale de la variation du coefficient
-mean_variation <- mean(global_data$ACC, na.rm = TRUE)
-standard_deviation <- sd(global_data$ACC, na.rm = TRUE)
-cat("Mean Variation Coefficient:", mean_variation, "\n")
-cat("Standard Deviation:", standard_deviation, "\n")
+# mean_variation <- mean(global_data$ACC, na.rm = TRUE)
+# standard_deviation <- sd(global_data$ACC, na.rm = TRUE)
+# cat("Mean Variation Coefficient:", mean_variation, "\n")
+# cat("Standard Deviation:", standard_deviation, "\n")

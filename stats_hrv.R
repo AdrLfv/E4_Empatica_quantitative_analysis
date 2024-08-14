@@ -26,15 +26,14 @@ for (participant_folder in stream_folders) {
     participant_id <- substr(basename(participant_folder), 1, 3)
     # print(participant_id)
     for (i in 1:4) {
-        session_data <- get_hrv_data(participant_folder, sessions[i]) %>% pull()
+        session_data <- get_hrv_data(participant_folder, sessions[i]) %>% head(60) %>% pull()
         # print(head(session_data))
         # amplitude <- max(session_data) - min(session_data)
+        mean_variation <- mean(session_data, na.rm = TRUE)
+        cat(mean_variation, ";")
         # standard_deviation <- sd(session_data)
-        # mean_variation <- mean(session_data, na.rm = TRUE)
-        # cat(mean_variation, ";")
-        # print(standard_deviation)
         # cat(standard_deviation, ";")
-        global_data <- rbind(global_data, data.frame(Participant = participant_id, Session = sessions[i], Variation_Coefficient = session_data))
+        # global_data <- rbind(global_data, data.frame(Participant = participant_id, Session = sessions[i], Variation_Coefficient = session_data))
     }
     print("\n")
 }
@@ -42,5 +41,5 @@ for (participant_folder in stream_folders) {
 # Afficher la moyenne golbale de la variation du coefficient
 # mean_variation <- mean(global_data$Variation_Coefficient, na.rm = TRUE)
 # standard_deviation <- sd(global_data$Variation_Coefficient, na.rm = TRUE)
-cat("Mean Variation Coefficient:", mean_variation, "\n")
+# cat("Mean Variation Coefficient:", mean_variation, "\n")
 # cat("Standard Deviation:", standard_deviation, "\n")

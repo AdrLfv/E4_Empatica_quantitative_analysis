@@ -23,7 +23,7 @@ for (participant_folder in stream_folders) {
     isPianist <- substr(participant_info$isPianist, 1, 1)
 
     for (i in 1:4) {
-        session_data <- center_ACC(participant_folder, sessions_order[i])
+        session_data <- center_ACC(participant_folder, sessions_order[i]) %>% head(60*32)
         if (!is.null(session_data)) {
             session_data <- session_data %>% mutate(
                 Participant = participant_id,

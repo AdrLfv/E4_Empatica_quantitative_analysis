@@ -89,7 +89,7 @@ ggplot(data_A_long, aes(x = Condition, y = Connection)) +
   geom_boxplot(alpha = 0.7, color = "black") +  # Couleur fixe pour les boîtes à moustaches
   geom_jitter(width = 0.2, alpha = 0.7, aes(color = Familiarity)) +
   scale_color_manual(values = familiarity_colors) +  # Assigner les couleurs manuellement
-  ggtitle("Box Plot of Felt Connection before and after experimenting MirrorFugue (Session A)") +
+  #ggtitle("Box Plot of Felt Connection before and after experimenting MirrorFugue (Session A)") +
   xlab("Condition") +
   ylab("Connection Level") +
   theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
@@ -105,7 +105,7 @@ ggplot(data_B_long, aes(x = Condition, y = Connection)) +
   geom_boxplot(alpha = 0.7, color = "black") +  # Couleur fixe pour les boîtes à moustaches
   geom_jitter(width = 0.2, alpha = 0.7, aes(color = Familiarity)) +
   scale_color_manual(values = familiarity_colors) +  # Assigner les couleurs manuellement
-  ggtitle("Box Plot of Felt Connection before and after experimenting MirrorFugue(Session B)") +
+  #ggtitle("Box Plot of Felt Connection before and after experimenting MirrorFugue(Session B)") +
   xlab("Condition") +
   ylab("Connection Level") +
   theme(axis.text.x = element_text(angle = 90, hjust = 1)) +

@@ -19,24 +19,26 @@ get_hr_data <- function(participant_folder, session) {
     file_path <- file.path(participant_folder, "HR", paste0(session, "_HR.csv"))
     if (!file.exists(file_path)) return(NULL)
     data <- read.csv(file_path, header = TRUE, stringsAsFactors = FALSE, sep = ";")
-    data <- data %>% select(Variation.coefficient) %>% head(60)
+    data <- data %>% select(Variation.coefficient)
     return(data)
 }
 
 # Combine HR data with participant information
 hr_data <- data.frame()
-sessions <- c("A", "B", "C", "D")
 
 for (participant_folder in stream_folders) {
     participant_id <- substr(basename(participant_folder), 1, 3)
+    participant_order <- participant_data[participant_data$ID == participant_id, "Order"]
 
-    for (session in sessions) {
-      # On choisit de ne considérer que la session A
-      session_data <- get_hr_data(participant_folder, session) %>% mutate(
-          Participant = participant_id,
-          Session = session
-      )
-      hr_data <- bind_rows(hr_data, session_data)
+    for (i in 1:4) {
+      session <- substr(participant_order, i, i)
+      session_data <- get_hr_data(participant_folder, session)
+      if (!is.null(session_data)) {
+          session_data$Participant <- participant_id
+          session_data$Session <- i
+          session_data$Group <- session
+          hr_data <- rbind(hr_data, session_data)
+      }
     }
 }
 
@@ -54,18 +56,22 @@ hr_data_long <- hr_data %>%
     pivot_longer(cols = c(Variation.coefficient),
                  names_to = "Condition",
                  values_to = "HR_variation") %>%
-    mutate(Condition = factor(Condition, levels = c("Variation.coefficient"), labels = c("HR Variation")),
-           Session = factor(Session, levels = c("A", "B", "C", "D")))
+    mutate(Condition = factor(Condition, levels = c("Variation.coefficient"), labels = c("Heart Rate Coefficient of Variation")),
+    # levels va de 1 à 4
+           Session = factor(Session, levels = c("1", "2", "3", "4")))
 
 # Create the box plot
 ggplot(hr_data_long, aes(x = Session, y = HR_variation, fill = Session)) +
     geom_boxplot(alpha = 0.7) +
     geom_jitter(width = 0.2, alpha = 0.5) +
-    labs(title = "Box plot of heart rate variation by session",
-         x = "Session",
-         y = "Heart Rate Variation") +
-    theme(axis.text.x = element_text(angle = 90, hjust = 1))
+    labs(
+            x = "Session",
+            y = "Heart Rate Variation",
+            fill = "Session"
+        ) +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+    scale_fill_brewer(palette = "Set3")  # Utiliser une palette de couleurs prédéfinie
 
 
 # Sauvegarder le graphique en local
-ggsave("D:/MIT project/2024_06 E4 Data/hrv_session_histogram.png", width = 10, height = 6)
+ggsave("D:/MIT project/2024_06 E4 Data/hrv_order_box_plot.png", width = 10, height = 6)
