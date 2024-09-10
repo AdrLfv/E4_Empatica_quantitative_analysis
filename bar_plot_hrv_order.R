@@ -51,6 +51,12 @@ hr_data_summary_sd <- hr_data %>%
     group_by(Session) %>%
     summarise(HR_variation_sd = sd(Variation.coefficient, na.rm = TRUE))
 
+cat("Mean HR variation by session:\n")
+print(hr_data_summary_mean)
+
+cat("Standard deviation of HR variation by session:\n")
+print(hr_data_summary_sd)
+
 # Create the bar plot
 p_mean <- ggplot(hr_data_summary_mean, aes(x=factor(Session), y = HR_variation_mean, fill = factor(Session))) +
     geom_bar(stat="identity", position = "dodge", alpha = 0.7) +
@@ -59,7 +65,8 @@ p_mean <- ggplot(hr_data_summary_mean, aes(x=factor(Session), y = HR_variation_m
             y = "Mean Heart Rate Variation",
             fill = "Session" 
         ) + 
-    theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+    theme(axis.text.x = element_text(angle = 0, hjust = 1),
+        text = element_text(family = "Arial", size = 16)) +
     scale_fill_brewer(palette = "YlGnBu")  # Utiliser une palette de couleurs prédéfinie
 
 p_sd <- ggplot(hr_data_summary_sd, aes(x=factor(Session), y = HR_variation_sd, fill = factor(Session))) +
@@ -69,7 +76,8 @@ p_sd <- ggplot(hr_data_summary_sd, aes(x=factor(Session), y = HR_variation_sd, f
             y = "Mean Heart Rate Variation",
             fill = "Session" 
         ) + 
-    theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+    theme(axis.text.x = element_text(angle = 0, hjust = 1),
+        text = element_text(family = "Arial", size = 16)) +
     scale_fill_brewer(palette = "YlGnBu")  # Utiliser une palette de couleurs prédéfinie
 
 # Sauvegarder le graphique en local

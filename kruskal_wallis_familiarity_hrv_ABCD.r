@@ -57,7 +57,8 @@ calculate_Kruskal <- function(chosen_vital_status) {
         TRUE ~ NA_character_
     )
 
-    # pianists <- c("C")
+    # TO REMOVE
+    # pianists <- c("A")
 
     for (participant_folder in stream_folders) {
         participant_id <- substr(basename(participant_folder), 1, 3)
@@ -79,7 +80,6 @@ calculate_Kruskal <- function(chosen_vital_status) {
 
     #Filter hr_data to keep only the considered pianists not in the list of excluded participants
     hr_data <- hr_data %>% filter(Familiarity != "Unknown" & Familiarity != "Self")
-    
 
     # Perform Kruskal-Wallis test
     kruskal_test <- kruskal.test(Variation.coefficient ~ Familiarity, data = hr_data)

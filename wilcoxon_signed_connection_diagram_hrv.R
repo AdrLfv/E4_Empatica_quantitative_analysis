@@ -9,6 +9,15 @@ file_path <- "D:/MIT project/2024_06 E4 Data/participants.csv"
 # Lire les données du fichier Excel
 data <- read.csv(file_path, header = TRUE, stringsAsFactors = FALSE, sep = ";")
 
+# To count the number of occurences
+all_familiarities = "SSFFSSFSPSRAPFSSFSFSPFRSSSFSFSSSSSASASFAFSFSFRRSFFRAASFR"
+familiarity_A = "SFSFSFFRSFFSSAAFFFFFAF"
+
+
+# Afficher le nombre de chaque lettre dans la chaîne de caractères
+print(table(strsplit(familiarity_A, "")[[1]]))
+
+
 # Construction d'un tableau à partir de la moyenne de A_diagram_before et A_diagram_after, et de celle de B_diagram_before et B_diagram_after
 data_long <- data %>% select(ID, A_diagram_before, A_diagram_after, B_diagram_before, B_diagram_after) %>%
   mutate(mean_connection_before = (A_diagram_before + B_diagram_before) / 2,

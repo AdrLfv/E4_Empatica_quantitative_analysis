@@ -1,63 +1,41 @@
 library(dplyr)
 library(tibble)
-library(tidyverse)
 
 base_path <- "D:/MIT project/2024_06 E4 Data/Cleaned data"
 # Lister tous les dossiers dans le chemin de base
 stream_folders <- list.dirs(base_path, recursive = FALSE)
 
-get_mean_var_coeff <- function(file_path) {
-  data_file <- read.csv(file_path, header = TRUE, stringsAsFactors = FALSE, sep = ";")
-  coeff_var_data <- data_file %>% select(Variation.coefficient)
-  
-  # Calculer la moyenne et la variance
-  mean_value <- mean(coeff_var_data$Variation.coefficient)
-  variance_value <- sd(coeff_var_data$Variation.coefficient)
-  max_value <- max(coeff_var_data$Variation.coefficient)
-  min_value <- min(coeff_var_data$Variation.coefficient)
-  return(c(mean_value, variance_value, max_value, min_value))
+get_hrv_data <- function(participant_folder, session) {
+    file_path <- file.path(participant_folder, "HR", paste0(session, "_HR.csv"))
+    if (!file.exists(file_path)) return(NULL)
+    data <- read.csv(file_path, header = TRUE, stringsAsFactors = FALSE, sep = ";")
+    data <- data %>% select(Variation.coefficient) %>% head(60)
+    return(data)
 }
 
-# Initialiser les listes pour stocker les résultats
-results <- tibble(
-  Group = character(),
-  Mean = double(),
-  Variance = double(),
-  Max = double(),
-  Min = double()
-)
+global_data <- data.frame()
 
 for (participant_folder in stream_folders) {
-  participant <- substr(basename(participant_folder), 1, 3)
+  participant_id <- substr(basename(participant_folder), 1, 3)
   
-  if (participant_id == "P05" | participant_id == "P06" | participant_id == "P07" | participant_id == "P11" | participant_id == "P24" | participant_id == "P26") {
-      next
-  }
+  # if (participant_id %in% c("P05", "P06", "P07", "P11", "P24", "P26")) {
+  #     next
+  # }
+  
   for (session in c("A", "B", "C", "D")) {
     file_path <- file.path(participant_folder, "HR", paste0(session, "_HR.csv"))
-    # si la session in c("A", "B") le group est "calm" sinon "dynamic"
     session_group <- ifelse(session %in% c("A", "B"), "Calm", "Dynamic")
-    if (file.exists(file_path)) {
-      session_results <- get_mean_var_coeff(file_path) %>% head(60)
-      results <- results %>% add_row(
-        Group = session_group,
-        Mean = session_results[1],
-        Variance = session_results[2],
-        Max = session_results[3],
-        Min = session_results[4]
-      )
-    }
+    session_data <- get_hrv_data(participant_folder, session) %>% mutate(Group = session_group)
+    global_data <- bind_rows(global_data, session_data)
   }
 }
 
-# Calculer les moyennes des statistiques pour chaque session
-summary_results <- results %>%
+# Calculer les moyennes et l'écart-type des statistiques pour chaque groupe
+summary_results <- global_data %>%
   group_by(Group) %>%
   summarise(
-    Mean_Mean = mean(Mean),
-    Mean_Variance = mean(Variance),
-    Mean_Max = mean(Max),
-    Mean_Min = mean(Min)
+    Mean_Variation_Coefficient = mean(Variation.coefficient, na.rm = TRUE),
+    SD_Variation_Coefficient = sd(Variation.coefficient, na.rm = TRUE)
   )
 
 # Afficher les résultats

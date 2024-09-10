@@ -15,8 +15,8 @@ participants <- read.csv(participant_file, header = TRUE, stringsAsFactors = FAL
 stream_folders <- list.dirs(base_path, recursive = FALSE)
 
 # Function to retrieve HR data
-get_hr_data <- function(participant_folder, session) {
-    file_path <- file.path(participant_folder, "HR", paste0(session, "_HR.csv"))
+get_hr_data <- function(participant_folder, Pianist) {
+    file_path <- file.path(participant_folder, "HR", paste0(Pianist, "_HR.csv"))
     if (!file.exists(file_path)) return(NULL)
     data <- read.csv(file_path, header = TRUE, stringsAsFactors = FALSE, sep = ";")
     data <- data %>% select(Variation.coefficient)
@@ -25,49 +25,53 @@ get_hr_data <- function(participant_folder, session) {
 
 # Combine HR data with participant information
 hr_data <- data.frame()
-sessions <- c("A", "B", "C", "D")
+Pianists <- c("A", "B", "C", "D")
 
 for (participant_folder in stream_folders) {
     participant_id <- substr(basename(participant_folder), 1, 3)
 
-    for (session in sessions) {
-      # On choisit de ne considérer que la session A
-      session_data <- get_hr_data(participant_folder, session) %>% head(60) %>% mutate(
+    for (Pianist in Pianists) {
+      # On choisit de ne considérer que la Pianist A
+      Pianist_data <- get_hr_data(participant_folder, Pianist) %>% head(60) %>% mutate(
           Participant = participant_id,
-          Session = session
+          Pianist = Pianist
       )
-      hr_data <- bind_rows(hr_data, session_data)
+      hr_data <- bind_rows(hr_data, Pianist_data)
     }
 }
 
 # For each familiarity, calculate the mean HR variation, standard deviation, and number of observations
 hr_summary <- hr_data %>%
-    group_by(Session) %>%
+    group_by(Pianist) %>%
     summarise(mean_variation = mean(Variation.coefficient),
               sd_variation = sd(Variation.coefficient),
               n = n())
-cat("Mean HR variation by session:\n")
+cat("Mean HR variation by Pianist:\n")
 print(hr_summary)
 
-# Ensure 'Session' has the desired order
+# Ensure 'Pianist' has the desired order
 hr_data_long <- hr_data %>%
     pivot_longer(cols = c(Variation.coefficient),
         names_to = "Condition",
         values_to = "HR_variation") %>%
     mutate(Condition = factor(Condition, levels = c("Variation.coefficient"), labels = c("Hear Rate Coefficient of Variation")),
-        Session = factor(Session, levels = c("A", "B", "C", "D")))
+        Pianist = factor(Pianist, levels = c("A", "B", "C", "D")))
 
 # Create the box plot
-ggplot(hr_data_long, aes(x = Session, y = HR_variation, fill = Session)) +
-    geom_boxplot(alpha = 0.7) +
-    geom_jitter(width = 0.2, alpha = 0.5) +
+ggplot(hr_data_long, aes(x = Pianist, y = HR_variation, fill = Pianist)) +
+    # geom_boxplot(alpha = 0.7) +
+    geom_boxplot(alpha = 0.7, outlier.shape = NA) +
+    #geom_jitter(width = 0.2, alpha = 0.5) +
     labs(
-            x = "Session",
-            y = "Heart Rate Variation",
-            fill = "Session"
+            x = "Pianist",
+            y = "Heart Rate Coefficient of Variation",
+            fill = "Pianist"
         ) +
-    theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
-    scale_fill_brewer(palette = "Set3")
+    theme(axis.text.x = element_text(angle = 0, hjust = 1),
+        text = element_text(family = "Arial", size = 18)) +
+    scale_fill_brewer(palette = "Set3") +
+    coord_cartesian(ylim = c(-15, 15)) +  # Définir les limites de l'axe y
+    scale_y_continuous(breaks = seq(-15, 15, by = 5))  # Définir les indices de l'axe y toutes les 5 unités
 
 
 # Sauvegarder le graphique en local

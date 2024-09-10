@@ -1,9 +1,9 @@
-# Installer les packages nécessaires si ce n'est pas déjà fait
+# Install the necessary packages if it is not already done
 # install.packages("signal")
 # install.packages("pracma")
 # install.packages("dplyr")
-#install.packages("FSA")
-#install.packages("ggsignif")
+# install.packages("FSA")
+# install.packages("ggsignif")
 
 library(signal)
 library(pracma)
@@ -27,14 +27,14 @@ center_ACC <- function(participant_folder, session) {
     ACC = sqrt(acc_data$ACC_x^2 + acc_data$ACC_y^2 + acc_data$ACC_z^2)
   )
 
-  #méthode avec écart type
+  # Method with standard deviation
   #acc_data$ACC = (acc_data$ACC - mean(acc_data$ACC)) / sd(acc_data$ACC)
   
-  #méthode sans écart type
+  # Typical deviation method
   acc_data$ACC = acc_data$ACC - mean(acc_data$ACC)
   acc_data <- acc_data %>% select(ACC)
 
-  # enregistrer les données normalisées
+  # Save standard data
   # write.csv(acc_data, file.path(participant_folder, "ACC", paste0(session, "_ACC_normalised.csv")), row.names = FALSE)
 
   return(acc_data)

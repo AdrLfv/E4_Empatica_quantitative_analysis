@@ -32,7 +32,7 @@ for (participant_folder in stream_folders) {
 
     for (i in 1:4) {
       session <- substr(participant_order, i, i)
-      session_data <- get_hr_data(participant_folder, session)
+      session_data <- get_hr_data(participant_folder, session) %>% head(60)
       if (!is.null(session_data)) {
           session_data$Participant <- participant_id
           session_data$Session <- i
@@ -62,15 +62,19 @@ hr_data_long <- hr_data %>%
 
 # Create the box plot
 ggplot(hr_data_long, aes(x = Session, y = HR_variation, fill = Session)) +
-    geom_boxplot(alpha = 0.7) +
-    geom_jitter(width = 0.2, alpha = 0.5) +
+    # geom_boxplot(alpha = 0.7) +
+    geom_boxplot(alpha = 0.7, outlier.shape = NA) +
+    #geom_jitter(width = 0.2, alpha = 0.5) +
     labs(
             x = "Session",
-            y = "Heart Rate Variation",
+            y = "Heart Rate Coefficient of Variation",
             fill = "Session"
         ) +
-    theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
-    scale_fill_brewer(palette = "Set3")  # Utiliser une palette de couleurs prédéfinie
+    theme(axis.text.x = element_text(angle = 0, hjust = 1),
+        text = element_text(family = "Arial", size = 16)) +
+    scale_fill_brewer(palette = "Set3")  +
+    coord_cartesian(ylim = c(-15, 15)) +  # Définir les limites de l'axe y
+    scale_y_continuous(breaks = seq(-15, 15, by = 5))  # Définir les indices de l'axe y toutes les 5 unités
 
 
 # Sauvegarder le graphique en local

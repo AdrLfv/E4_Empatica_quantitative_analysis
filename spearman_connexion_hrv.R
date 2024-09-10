@@ -9,6 +9,8 @@ library(ggplot2)
 
 base_path <- "D:/MIT project/2024_06 E4 Data/Cleaned data"
 stream_folders <- list.dirs(base_path, recursive = FALSE)
+participant_file <- "D:/MIT project/2024_06 E4 Data/participants.csv"
+participants_data <- read.csv(participant_file, header = TRUE, stringsAsFactors = FALSE, sep = ";")
 
 # Function to retrieve HR data
 get_hr_data <- function(participant_folder, session) {
@@ -27,8 +29,10 @@ for (participant_folder in stream_folders) {
     if (participant_id %in% c("P05", "P06", "P07", "P11", "P24", "P26")) {
         next
     }
-    print(participant_id)
-    connection <- participant_data %>% filter(ID == participant_id) %>% select(Connection) %>% pull()
+    print(head(participants_data))
+
+
+    connection <- filter(participants_data, ID == participant_id) %>% select(Connection) %>% pull()
     
     session_data <- get_hr_data(participant_folder, "A") %>% head(60)
     if (!is.null(session_data)) {

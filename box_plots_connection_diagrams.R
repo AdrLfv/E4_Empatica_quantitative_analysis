@@ -1,26 +1,26 @@
-# Charger les packages nécessaires
-library(readxl)  # Pour lire les fichiers Excel
-library(ggplot2) # Pour créer des graphiques
-library(dplyr)   # Pour manipuler les données
-library(tidyr)   # Pour transformer les données
+# Load the necessary packages
+library(readxl)  # To read Excel files
+library(ggplot2) # To create graphics
+library(dplyr)   # To manipulate the data
+library(tidyr)   # To transform data
 
-# Définir le chemin vers le fichier Excel
+# Define the path to the Excel file
 base_path <- "D:/MIT project/2024_06 E4 Data/Cleaned data"
 participant_file <- "D:/MIT project/2024_06 E4 Data/participants.csv"
 stream_folders <- list.dirs(base_path, recursive = FALSE)
 
-# Lire les données du fichier Excel
+# Read data from the Excel file
 participants_data <- read.csv(participant_file, header = TRUE, stringsAsFactors = FALSE, sep = ";")
 
-# Créer un dictionnaire pour stocker la familiarité et la couleur de chaque participant
+#Create a dictionary to store the familiarity and color of each participant
 participants_colors_familiarity <- list()
 
 for (participant_folder in stream_folders) {
     participant_id <- substr(basename(participant_folder), 1, 3)
     participant_info <- participants_data %>% filter(ID == participant_id)
     familiarity <- substr(participant_info$Familiarity, 1, 1)
-    # Attribuer une couleur et une description à chaque niveau de familiarité
-    if (familiarity == "S") {
+    # Assign a color and a description to each level of familiarity
+    if (familiarity == "S" ||familiarity == "H") {
         participants_colors_familiarity[[participant_id]] <- c("Stranger", "red")
     } 
     # else if (familiarity == "H") {
@@ -28,7 +28,7 @@ for (participant_folder in stream_folders) {
     # } else if (familiarity == "M") {
     #     participants_colors_familiarity[[participant_id]] <- c("Met", "orange")
     # } 
-    else if (familiarity == "A") {
+    else if (familiarity == "A" ||familiarity == "M") {
         participants_colors_familiarity[[participant_id]] <- c("Acquaintance", "orange")
     } else if (familiarity == "F") {
         participants_colors_familiarity[[participant_id]] <- c("Friend", "yellow")
@@ -41,13 +41,13 @@ for (participant_folder in stream_folders) {
     }
 }
 
-# Sélectionner les colonnes nécessaires pour les sessions A
+# Select the necessary columns for sessions A
 data_A <- participants_data %>% 
   select(ID, A_diagram_before, A_diagram_after) %>%
   mutate(connection_before = A_diagram_before,
          connection_after = A_diagram_after)
 
-# Reshaping les données pour ggplot (sessions A)
+# Reshaping data for ggplot (sessions a)
 data_A_long <- data_A %>%
   pivot_longer(cols = c(connection_before, connection_after),
                names_to = "Condition",
@@ -56,14 +56,14 @@ data_A_long <- data_A %>%
          Familiarity = sapply(ID, function(id) participants_colors_familiarity[[id]][1]),
          Color = sapply(ID, function(id) participants_colors_familiarity[[id]][2]))
 
-# Sélectionner les colonnes nécessaires pour les sessions B
+# Select the necessary columns for B sessions
 data_B <- participants_data %>% 
   select(ID, B_diagram_before, B_diagram_after) %>%
   mutate(connection_before = B_diagram_before,
          connection_after = B_diagram_after)
 
 
-# Reshaping les données pour ggplot (sessions B)
+# Reshaping data for ggplot (B sessions)
 data_B_long <- data_B %>%
   pivot_longer(cols = c(connection_before, connection_after),
                names_to = "Condition",
@@ -72,7 +72,7 @@ data_B_long <- data_B %>%
          Familiarity = sapply(ID, function(id) participants_colors_familiarity[[id]][1]),
          Color = sapply(ID, function(id) participants_colors_familiarity[[id]][2]))
          
-# Définir l'ordre des niveaux de Familiarity et des couleurs correspondantes
+# Define the order of familiarity levels and corresponding colors
 familiarity_levels <- c("Stranger", "Acquaintance", "Friend", "Relative", "Self")
 familiarity_colors <- c("red", "orange", "yellow", "yellowgreen", "green")
 
@@ -80,34 +80,36 @@ if (!all(familiarity_levels %in% unique(data_A_long$Familiarity))) {
   stop("Familiarity levels do not match the data in session A")
 }
 
-# Mettre à jour les données avec l'ordre correct
+# Update the data with the correct order
 data_A_long <- data_A_long %>%
   mutate(Familiarity = factor(Familiarity, levels = familiarity_levels))
 
-# Créer et sauvegarder le graphique pour la session A
+# Create and save the graph for the session A
 ggplot(data_A_long, aes(x = Condition, y = Connection)) +
-  geom_boxplot(alpha = 0.7, color = "black") +  # Couleur fixe pour les boîtes à moustaches
-  geom_jitter(width = 0.2, alpha = 0.7, aes(color = Familiarity)) +
-  scale_color_manual(values = familiarity_colors) +  # Assigner les couleurs manuellement
+  geom_boxplot(alpha = 0.7, color = "black") +  # Fixed color for mustache boxes
+  geom_jitter(width = 0.06, size = 5, alpha = 0.7, aes(color = Familiarity)) +
+  scale_color_manual(values = familiarity_colors) +  # Assign colors manually
   #ggtitle("Box Plot of Felt Connection before and after experimenting MirrorFugue (Session A)") +
-  xlab("Condition") +
+  xlab("Questionnaire moment") +
   ylab("Connection Level") +
-  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  theme(axis.text.x = element_text(angle = 0, hjust = 0.5),
+        text = element_text(family = "Arial", size = 18)) +
   guides(color = guide_legend(title = "Familiarity"))
 ggsave("D:/MIT project/2024_06 E4 Data/connection_plot_A.png", width = 10, height = 6)
 
-# Mettre à jour les données pour la session B avec l'ordre correct
+# Update the data for the B session with the correct order
 data_B_long <- data_B_long %>%
   mutate(Familiarity = factor(Familiarity, levels = familiarity_levels))
 
-# Créer et sauvegarder le graphique pour la session B
+# Create and save the graphic for session B
 ggplot(data_B_long, aes(x = Condition, y = Connection)) +
-  geom_boxplot(alpha = 0.7, color = "black") +  # Couleur fixe pour les boîtes à moustaches
-  geom_jitter(width = 0.2, alpha = 0.7, aes(color = Familiarity)) +
-  scale_color_manual(values = familiarity_colors) +  # Assigner les couleurs manuellement
+  geom_boxplot(alpha = 0.7, color = "black") +  # Fixed color for mustache boxes
+  geom_jitter(width = 0.06, size = 5, alpha = 0.7, aes(color = Familiarity)) +
+  scale_color_manual(values = familiarity_colors) +  # Assign colors manually
   #ggtitle("Box Plot of Felt Connection before and after experimenting MirrorFugue(Session B)") +
-  xlab("Condition") +
+  xlab("Questionnaire moment") +
   ylab("Connection Level") +
-  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  theme(axis.text.x = element_text(angle = 0, hjust = 0.5),
+        text = element_text(family = "Arial", size = 18)) +
   guides(color = guide_legend(title = "Familiarity"))
 ggsave("D:/MIT project/2024_06 E4 Data/connection_plot_B.png", width = 10, height = 6)
