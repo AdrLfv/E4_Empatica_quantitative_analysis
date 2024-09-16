@@ -4,9 +4,11 @@ library(ggplot2) # To create graphics
 library(dplyr)   # To manipulate the data
 library(tidyr)   # To transform data
 
+# This script generates box plots to visualize the felt connections before and after sessions for different familiarity levels.
+
 # Define the path to the Excel file
-base_path <- "D:/MIT project/2024_06 E4 Data/Cleaned data"
-participant_file <- "D:/MIT project/2024_06 E4 Data/participants.csv"
+base_path <- "D:/path_to_folder/Cleaned data"
+participant_file <- "D:/path_to_folder/participants.csv"
 stream_folders <- list.dirs(base_path, recursive = FALSE)
 
 # Read data from the Excel file
@@ -95,7 +97,7 @@ ggplot(data_A_long, aes(x = Condition, y = Connection)) +
   theme(axis.text.x = element_text(angle = 0, hjust = 0.5),
         text = element_text(family = "Arial", size = 18)) +
   guides(color = guide_legend(title = "Familiarity"))
-ggsave("D:/MIT project/2024_06 E4 Data/connection_plot_A.png", width = 10, height = 6)
+ggsave("D:/path_to_folder/connection_plot_A.png", width = 10, height = 6)
 
 # Update the data for the B session with the correct order
 data_B_long <- data_B_long %>%
@@ -112,4 +114,4 @@ ggplot(data_B_long, aes(x = Condition, y = Connection)) +
   theme(axis.text.x = element_text(angle = 0, hjust = 0.5),
         text = element_text(family = "Arial", size = 18)) +
   guides(color = guide_legend(title = "Familiarity"))
-ggsave("D:/MIT project/2024_06 E4 Data/connection_plot_B.png", width = 10, height = 6)
+ggsave("D:/path_to_folder/connection_plot_B.png", width = 10, height = 6)

@@ -5,9 +5,11 @@ library(ggplot2)
 library(FSA)
 library(ggsignif)
 
+# This script performs a Friedman test to compare the mean delta heart rate (ΔHR) across sessions, and conducts post hoc tests if the results are significant.
+
 # Base paths
-base_path <- "D:/MIT project/2024_06 E4 Data/Cleaned data"
-participant_file <- "D:/MIT project/2024_06 E4 Data/participants.csv"
+base_path <- "D:/path_to_folder/Cleaned data"
+participant_file <- "D:/path_to_folder/participants.csv"
 
 # Load participant information
 participant_data <- read.csv(participant_file, header = TRUE, stringsAsFactors = FALSE, sep = ";")
@@ -20,7 +22,7 @@ get_hr_data <- function(participant_folder, session) {
     file_path <- file.path(participant_folder, "HR", paste0(session, "_HR.csv"))
     if (!file.exists(file_path)) return(NULL)
     data <- read.csv(file_path, header = TRUE, stringsAsFactors = FALSE, sep = ";")
-    data <- data %>% select(Variation.coefficient) %>% head(60)
+    data <- data %>% select(Delta_Heart_Rate) %>% head(60)
     return(data)
 }
 
@@ -48,8 +50,8 @@ for (participant_folder in stream_folders) {
 # Prepare data for Friedman test
 friedman_data <- hr_data %>%
     group_by(Participant, Session) %>%
-    summarise(mean_coeff_var = mean(Variation.coefficient, na.rm = TRUE)) %>%
-    spread(key = Session, value = mean_coeff_var)
+    summarise(mean_var = mean(Delta_Heart_Rate, na.rm = TRUE)) %>%
+    spread(key = Session, value = mean_var)
 
 # Perform Friedman test
 friedman_test_result <- friedman.test((as.matrix(friedman_data[,-1])))

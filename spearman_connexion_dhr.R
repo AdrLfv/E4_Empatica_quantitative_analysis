@@ -6,10 +6,11 @@ library(ggsignif)
 library(Hmisc)
 library(ggplot2)
 
+# This script performs a Spearman correlation test between connection data and delta heart rate (ΔHR) data.
 
-base_path <- "D:/MIT project/2024_06 E4 Data/Cleaned data"
+base_path <- "D:/path_to_folder/Cleaned data"
 stream_folders <- list.dirs(base_path, recursive = FALSE)
-participant_file <- "D:/MIT project/2024_06 E4 Data/participants.csv"
+participant_file <- "D:/path_to_folder/participants.csv"
 participants_data <- read.csv(participant_file, header = TRUE, stringsAsFactors = FALSE, sep = ";")
 
 # Function to retrieve HR data
@@ -17,8 +18,8 @@ get_hr_data <- function(participant_folder, session) {
     file_path <- file.path(participant_folder, "HR", paste0(session, "_HR.csv"))
     if (!file.exists(file_path)) return(NULL)
     data <- read.csv(file_path, header = TRUE, stringsAsFactors = FALSE, sep = ";")
-    # data <- data %>% select(Variation.coefficient) %>% head(60)
-    data <- data %>% select(Variation.coefficient)
+    # data <- data %>% select(Delta_Heart_Rate) %>% head(60)
+    data <- data %>% select(Delta_Heart_Rate)
     return(data)
 }
 
@@ -42,21 +43,21 @@ for (participant_folder in stream_folders) {
     }
 }
 
-# Enregistrement de la data normalisée
-# write.table(global_data, "D:/MIT project/2024_06 E4 Data/hr_data.csv", row.names = FALSE, sep=";")
+# Normalized data recording
+# write.table(global_data, "D:/path_to_folder/hr_data.csv", row.names = FALSE, sep=";")
 
-# Effectuer le test de Spearman
-spearman_test <- cor.test(global_data$Connection, global_data$Variation.coefficient, method = "spearman")
+# Perform the Spearman test
+spearman_test <- cor.test(global_data$Connection, global_data$Delta_Heart_Rate, method = "spearman")
 print(spearman_test)
 
-# Calculer kendall's tau
-kendall_tau <- cor.test(global_data$Connection, global_data$Variation.coefficient, method = "kendall")
+# Calculate Kendall's Tau
+kendall_tau <- cor.test(global_data$Connection, global_data$Delta_Heart_Rate, method = "kendall")
 cat("Kendall's tau:", kendall_tau$estimate, "\n")
 
-# Calculer Somers' D
-somers_d <- somers2(global_data$Connection, global_data$Variation.coefficient)
+# Calculate Somers' D
+somers_d <- somers2(global_data$Connection, global_data$Delta_Heart_Rate)
 cat("Somers' D:", somers_d$Dxy, "\n")
 
 
-# Exécuter les fonctions de test
+# Perform the test functions
 print("done")

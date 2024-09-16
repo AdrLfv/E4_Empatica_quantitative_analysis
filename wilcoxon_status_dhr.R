@@ -4,12 +4,14 @@ library(tidyverse)
 library(openxlsx)
 library(ggplot2)
 
-# Définir le chemin de base
-base_path <- "D:/MIT project/2024_06 E4 Data/Cleaned data"
+# This script performs Wilcoxon tests and calculates summary statistics for the delta heart rate (ΔHR) data
+
+# Define the basic path
+base_path <- "D:/path_to_folder/Cleaned data"
 stream_folders <- list.dirs(base_path, recursive = FALSE)
 
 # Load participant information
-participant_file <- "D:/MIT project/2024_06 E4 Data/participants.csv"
+participant_file <- "D:/path_to_folder/participants.csv"
 participants_data <- read.csv(participant_file, header = TRUE, stringsAsFactors = FALSE, sep = ";")
 
 # A: alive, nonpro
@@ -24,7 +26,7 @@ get_session_data <- function(participant_folder, session, participant_id) {
     level <- ifelse(session %in% c("A", "B"), "Non-pro", "Pro")
     status <- ifelse(session %in% c("A", "C"), "Alive", "Deceased")
     data <- data_file %>%
-        select(Variation.coefficient) %>%
+        select(Delta_Heart_Rate) %>%
         head(60) %>%
         mutate(Participant = participant_id, Session = session, Music_type = music_type, Level = level, Status = status)
   return(data)
@@ -67,7 +69,7 @@ for (participant_folder in stream_folders) {
 filtered_data <- all_data %>%
   filter(Familiarity == "Stranger", Session %in% c("C", "D"))
 
-# Créer une nouvelle colonne pour identifier les comparaisons spécifiques
+# Create a new column to identify specific comparisons
 filtered_data <- filtered_data %>%
   mutate(Comparison = case_when(
     Session == "B" ~ "B (Deceased Non-Pro)",
@@ -75,62 +77,62 @@ filtered_data <- filtered_data %>%
     Session == "D" ~ "D (Deceased Pro)"
   ))
 
-# Générer le box plot pour B vs C et C vs D
-p_vital_status <- ggplot(filtered_data, aes(x = Comparison, y = Variation.coefficient, fill = Comparison)) +
+# Generate the Box Plot for B vs C and C vs D
+p_vital_status <- ggplot(filtered_data, aes(x = Comparison, y = Delta_Heart_Rate, fill = Comparison)) +
   geom_boxplot(alpha = 0.7, outlier.shape = NA) +
-  labs(x = "Pianist Comparison", y = "Heart Rate Coefficient of Variation") +
+  labs(x = "Pianist Comparison", y = "ΔHR") +
   theme(axis.text.x = element_text(angle = 0, hjust = 0.5),
         text = element_text(family = "Arial", size = 18)) +
   scale_fill_brewer(palette = "Set3") +
-  coord_cartesian(ylim = c(-10, 10)) +  # Limiter les valeurs de l'axe y
-  scale_y_continuous(breaks = seq(-10, 10, by = 5))  # Ajuster les étiquettes de l'axe y
+  coord_cartesian(ylim = c(-10, 10)) +  # Limit the values ​​of the y axis
+  scale_y_continuous(breaks = seq(-10, 10, by = 5))  # Adjust the labels of the Y axis
 
-# Enregistrer le box plot
-ggsave("D:/MIT project/2024_06 E4 Data/boxplot_C_D_vital_status.png", plot = p_vital_status, width = 10, height = 6)
+# Save the BOX PLOT
+ggsave("D:/path_to_folder/boxplot_C_D_vital_status.png", plot = p_vital_status, width = 10, height = 6)
 
-# # Générer et sauvegarder le boxplot pour le statut vital
-# p_vitality <- ggplot(all_data, aes(x = Status, y = Variation.coefficient, fill = Status)) +
+# # Generate and save the boxplot for vital status
+# p_vitality <- ggplot(all_data, aes(x = Status, y = Delta_Heart_Rate, fill = Status)) +
 #   geom_boxplot(alpha = 0.7, outlier.shape = NA) +
-#   labs(x = "Pianists Vital Status", y = "Heart Rate Coefficient of Variation") +
+#   labs(x = "Pianists Vital Status", y = "ΔHR") +
 #   theme(axis.text.x = element_text(angle = 0, hjust = 0.5),
 #         text = element_text(family = "Arial", size = 18)) +
 #   scale_fill_brewer(palette = "Set3") +
 #   coord_cartesian(ylim = c(-10, 10)) +  # Limites de l'axe y
 #   scale_y_continuous(breaks = seq(-10, 10, by = 5))  # Incréments sur l'axe y
-# ggsave("D:/MIT project/2024_06 E4 Data/boxplot_vital_status.png", plot = p_vitality, width = 10, height = 6)
+# ggsave("D:/path_to_folder/boxplot_vital_status.png", plot = p_vitality, width = 10, height = 6)
 
-# Effectuer le test de Wilcoxon pour les différentes combinaisons
+# Perform the Wilcoxon test for the different combinations
 
-# Filtrer les données pour ne conserver que la familiarité Stranger
+# Filter the data to keep only the Stranger familiarity
 all_data <- all_data %>% filter(Familiarity == "Stranger")
 cat("Variable: alive vs. deceased\n")
-wilcox_test_result_1 <- wilcox.test(all_data$Variation.coefficient[all_data$Status == "Alive"], 
-                                    all_data$Variation.coefficient[all_data$Status == "Deceased"], 
+wilcox_test_result_1 <- wilcox.test(all_data$Delta_Heart_Rate[all_data$Status == "Alive"], 
+                                    all_data$Delta_Heart_Rate[all_data$Status == "Deceased"], 
                                     paired = FALSE)
 print(wilcox_test_result_1)
 
 # cat("Variable: nonpro vs. pro\n")
-# wilcox_test_result_2 <- wilcox.test(all_data$Variation.coefficient[all_data$Level == "Non-pro"], 
-#                                     all_data$Variation.coefficient[all_data$Level == "Pro"], 
+# wilcox_test_result_2 <- wilcox.test(all_data$Delta_Heart_Rate[all_data$Level == "Non-pro"], 
+#                                     all_data$Delta_Heart_Rate[all_data$Level == "Pro"], 
 #                                     paired = TRUE)
 
 # print(wilcox_test_result_2)
 
-# Résumé des données avec moyenne, médiane, écart type, minimum et maximum
+# Data summary with average, median, standard deviation, minimum and maximum
 summary_data_level <- all_data %>%
   group_by(Level) %>%
   summarize(
-    mean_variation = mean(Variation.coefficient, na.rm = TRUE),
-    median_variation = median(Variation.coefficient, na.rm = TRUE),
-    sd_variation = sd(Variation.coefficient, na.rm = TRUE)
+    mean_variation = mean(Delta_Heart_Rate, na.rm = TRUE),
+    median_variation = median(Delta_Heart_Rate, na.rm = TRUE),
+    sd_variation = sd(Delta_Heart_Rate, na.rm = TRUE)
   )
 
 summary_data_status <- all_data %>%
   group_by(Status) %>%
   summarize(
-    mean_variation = mean(Variation.coefficient, na.rm = TRUE),
-    median_variation = median(Variation.coefficient, na.rm = TRUE),
-    sd_variation = sd(Variation.coefficient, na.rm = TRUE)
+    mean_variation = mean(Delta_Heart_Rate, na.rm = TRUE),
+    median_variation = median(Delta_Heart_Rate, na.rm = TRUE),
+    sd_variation = sd(Delta_Heart_Rate, na.rm = TRUE)
   )
 
 cat("Summary for Piano Level:\n")

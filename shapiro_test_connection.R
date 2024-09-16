@@ -4,11 +4,12 @@ library(ggplot2)
 library(FSA)
 library(ggsignif)
 
+# This script performs Shapiro-Wilk normality tests on connection data to determine if the data follows a normal distribution.
 
-base_path <- "D:/MIT project/2024_06 E4 Data/Cleaned data"
-# Lister tous les dossiers dans le chemin de base
+base_path <- "D:/path_to_folder/Cleaned data"
+# List all the files in the basic path
 stream_folders <- list.dirs(base_path, recursive = FALSE)
-participant_file <- "D:/MIT project/2024_06 E4 Data/participants.csv"
+participant_file <- "D:/path_to_folder/participants.csv"
 participant_data <- read.csv(participant_file, header = TRUE, stringsAsFactors = FALSE, sep = ";")
 
 min_p_value_HR <- 10000
@@ -19,12 +20,12 @@ max_p_value_HR_coeff <- 0
 shapirowilk_test <- function(participant_folder, col1, col2) {
   participant_id <- substr(basename(participant_folder), 1, 3)
   connection <- participant_data %>% filter(ID == participant_id) %>% select(col1, col2)
-  # creation d'un vecteur
+# Creation of a vector
   print(head(connection, 10))
   data <- c()
-  # pour chaque ligne du fichier
+# For each line of the file
   for (line in 1:28) {
-    # on ajoute au vecteur la valeur de la ligne colonne col2 - la valeur de la ligne colonne col1
+    # We add to the vector the value of the column column line - the value of the column line Col1
     data <- c(data, connection$col2[line] - connection$col1[line])    
   }
   # Perform Shapiro-Wilk normality test

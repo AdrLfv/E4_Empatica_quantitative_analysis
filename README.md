@@ -1,32 +1,46 @@
-# Process and Draw Graphs
+# Process and Analyze Data
 
-The program `process_and_draw_graphs.R`, is specifically designed to handle data from various sessions of an experiment, focusing on processing heart rate (HR) data, calculating its coefficient of variation, and processing Electrodermal Activity (EDA) and accelerometer (ACC) data. It aims to synchronize all collected data by aligning the first timestamp found in "tags.csv" with timestamps in "videos_timecodes.csv" and each E4 data stream file's timestamp.
+This directory contains several R scripts designed to process and analyze data from various sessions of an experiment. The focus is on handling heart rate (HR) data, calculating its delta (Δ𝐻𝑅(𝑡𝑥 ) = 𝐻𝑅(𝑡𝑥 ) − 𝐻𝑅(𝑡0)), and processing Electrodermal Activity (EDA) and accelerometer (ACC) data. The scripts aim to synchronize all collected data, generate visualizations, and perform statistical analyses.
+
+## Contents of the Directory
+
+### `process_and_draw_graphs.R`
+- **Data Synchronization**: This script synchronizes the experiment data with video recordings by matching the first timestamp found in "tags.csv" with corresponding timestamps in "videos_timecodes.csv" and the timestamps in each E4 data stream file. This ensures that the data from different sources are aligned for accurate analysis.
+  - **Tags Synchronization**: Aligns the first timestamp in "tags.csv" with the video timecodes.
+  - **E4 Data Stream Synchronization**: Aligns the timestamps in each E4 data stream file (HR, EDA, ACC) with the synchronized video timecodes.
+- **Comparison Graph Generation**: Utilizing the ggplot2 library, the script generates various graphs to visualize the processed and synchronized data, aiding in the identification of patterns, trends, and relationships.
+  - **Heart Rate Graphs**: Visualizes the heart rate data over time, highlighting significant events.
+  - **EDA Graphs**: Displays the electrodermal activity data, showing responses to stimuli.
+  - **ACC Graphs**: Illustrates the accelerometer data, indicating movement and activity levels.
+- **Customization**: Users can customize the generated graphs, adjusting aspects like colors, labels, titles, and axes to suit their analysis needs.
+  - **Color Customization**: Change the color schemes of the graphs.
+  - **Label Customization**: Modify the labels for axes and data points.
+  - **Title Customization**: Set custom titles for the graphs.
+  - **Axis Customization**: Adjust the scales and limits of the axes.
+
+### Tests and statistical summaries`
+  - **Wilcoxon Signed-Rank Test**: Compares paired samples to assess whether their population mean ranks differ.
+  - **Shapiro-Wilk Test**: Tests the normality of the data distribution.
+  - **Friedman Test**: Determines whether there are statistically significant differences between multiple groups.
+  - **Kruskal-Wallis Test**: Compares the medians of two or more groups to assess whether they are significantly different.
+  - **Spearman Correlation Test**: Evaluates the strength and direction of the relationship between two variables.
+  - **Descriptive Statistics**: Calculates mean, median, standard deviation, minimum, and maximum values for heart rate variation.
 
 ## Features
 
-- **Data Synchronization**: It synchronizes the experiment data with video recordings by matching the first timestamp in "tags.csv" with corresponding timestamps in "videos_timecodes.csv" and the timestamps in each E4 data stream file. This ensures that the data from different sources are aligned for accurate analysis.
-
-- **Graph Generation**: Utilizing the ggplot2 library, the program generates various graphs to visualize the processed and synchronized data, aiding in the identification of patterns, trends, and relationships.
-
-- **Customization**: Users can customize the generated graphs, adjusting aspects like colors, labels, titles, and axes to suit their analysis needs.
-
-- **Statistical Analysis**: Additional programs are included to format all the data, perform Wilcoxon and Shapiro tests and obtain other statistics, particularly on HR variations according to the order of passage, session, or other variables. These analyses help in understanding the impact of different conditions on participants' physiological responses.
+- **Data Synchronization**: Ensures that data from different sources are aligned for accurate analysis.
+- **Graph Generation**: Visualizes processed and synchronized data to identify patterns, trends, and relationships.
+- **Customization**: Allows users to customize graphs to meet their analysis needs.
+- **Statistical Analysis**: Performs statistical tests to understand the impact of different conditions on physiological responses.
+- **Data Filtering**: Filters data based on specific criteria for targeted analysis.
 
 ## Usage
 
-1. Ensure your data is prepared in a compatible format. The "videos_timecodes.csv" file should include a 'participant' column, followed by eight columns for video times in the `hh:mm:ss` format for each session phase (A_started, A_finished, B_started, ...), and a final 'Timestamp' column with all video times in the `hh:mm:ss` format when the E4's visual timestamp appears.
+To use the programs, run the R script `process_and_draw_graphs.R` to first synchronize data and generate comparison graphs.
 
-2. Modify the `TO MODIFY` sections in the `process_and_draw_graphs.R` script, specify the input files, output directory, and other necessary parameters.
+Ensure that all necessary data files (e.g., `tags.csv`, `videos_timecodes.csv`, `participants.csv` and E4 data stream files) are present in the working directory.
 
-3. Run the program to process the data and generate graphs, which will be saved in the specified output directory. Additionally, use the included statistical analysis programs as needed to further explore the data.
+## Prerequisites
 
-## Dependencies
-
-The program relies on the following R packages:
-
-- **ggplot2**: For data visualization and graph generation.
-- **dplyr**: For data manipulation and transformation.
-- **readr**: For reading data from various file formats.
-- **stats**: For performing statistical tests, including the Wilcoxon test.
-
-This automation follows the guidelines provided by Empatica on their [support site](https://support.empatica.com/hc/en-us/articles/202800715-Session-start-time-format-and-synchronization) for session start time format and synchronization.
+- R and RStudio installed
+- Required R libraries: `ggplot2`, `dplyr`, `ARTool`, etc.

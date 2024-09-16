@@ -6,15 +6,17 @@ library(ggsignif)
 library(Hmisc)
 library(ggplot2)
 
-source("D:/MIT project/E4_quantitative_analysis/center_ACC.R")
+# This script processes accelerometer (ACC) data by calculating the magnitude of acceleration from the x, y, and z components and centering the data for further analysis.
 
-base_path <- "D:/MIT project/2024_06 E4 Data/Cleaned data"
+source("D:/path_to_folder/E4_quantitative_analysis/center_ACC.R")
+
+base_path <- "D:/path_to_folder/Cleaned data"
 stream_folders <- list.dirs(base_path, recursive = FALSE)
 
 sessions <- c("A", "B", "C", "D")
 global_data <- data.frame()
 
-# Parcourir le dossier des participants
+# Browse the participants' file
 for (participant_folder in stream_folders) {
     participant_id <- substr(basename(participant_folder), 1, 3)
     # mean_acc_cumul <- 0 
@@ -22,7 +24,7 @@ for (participant_folder in stream_folders) {
     # sums_list <- list()
     for (i in 1:4) {
         session_acc <- center_ACC(participant_folder, sessions[i]) %>% head(60*32) %>% pull()
-        # somme de la valuer absolue de toutes les valeurs de l'accélération
+        # sum of the absolute value of all the values ​​of acceleration
         # mean_acc_cumul <- mean_acc_cumul + sum(abs(session_acc))/length(session_acc)  
         # sums_list[[i]] <- sum(abs(session_acc))/(length(session_acc)*100)
         standard_deviation <- sd(session_acc)
@@ -37,8 +39,8 @@ for (participant_folder in stream_folders) {
     # cat(participant_id, ";", mean_acc, "\n", sep="")
 }
 
-# Afficher la moyenne golbale de la variation du coefficient
+# Display the overall average of the variation
 # mean_variation <- mean(global_data$ACC, na.rm = TRUE)
 # standard_deviation <- sd(global_data$ACC, na.rm = TRUE)
-# cat("Mean Variation Coefficient:", mean_variation, "\n")
+# cat("Mean Delta_Heart_Rate:", mean_variation, "\n")
 # cat("Standard Deviation:", standard_deviation, "\n")

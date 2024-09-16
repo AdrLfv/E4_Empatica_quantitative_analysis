@@ -4,9 +4,12 @@ library(ggplot2)
 library(FSA)
 library(ggsignif)
 
+# This script performs a Kruskal-Wallis test to analyze the relationship between familiarity levels 
+# and connection data, and generates visualizations to illustrate the results.
+
 # Base paths
-base_path <- "D:/MIT project/2024_06 E4 Data/Cleaned data"
-participant_file <- "D:/MIT project/2024_06 E4 Data/participants.csv"
+base_path <- "D:/path_to_folder/Cleaned data"
+participant_file <- "D:/path_to_folder/participants.csv"
 
 # Load participant information
 participants <- read.csv(participant_file, header = TRUE, stringsAsFactors = FALSE, sep = ";")
@@ -18,7 +21,6 @@ hr_data <- data.frame()
 
 for (participant_folder in stream_folders) {
     participant_id <- substr(basename(participant_folder), 1, 3)
-    # We do not exclude anyone before everyone listened to Marvin
     # if (participant_id == "P05" | participant_id == "P06" | participant_id == "P07" | participant_id == "P11" | participant_id == "P24" | participant_id == "P26") {
     #     next
     # }
@@ -32,7 +34,7 @@ for (participant_folder in stream_folders) {
     # if (familiarity %in% c("A", "F", "S")) {
     connection_A <- participant_info$Connection_A
     connection_B <- participant_info$Connection_B
-    # on construit un data frame avec une colonne ID (de participants) et une colonne connection
+    # We build a data frame with an ID column (participants) and a connection column
     session_data <- data.frame(ID = participant_id, Connection = (connection_A+connection_B)/2)
     if (!is.null(session_data)) {
         session_data <- session_data %>% mutate(

@@ -5,12 +5,16 @@ library(FSA)
 library(ggsignif)
 library(rstatix)
 
+# This script performs data processing and statistical analysis on accelerometer (ACC) data 
+# collected from participants during different sessions. The primary goal is to center 
+# the ACC data and then conduct a Mann-Whitney U test to compare the accelerometer data 
+# between different groups (e.g., pianists vs. non-pianists).
 
-source("D:/MIT project/E4_quantitative_analysis/center_ACC.R")
+source("D:/path_to_folder/E4_quantitative_analysis/center_ACC.R")
 
-base_path <- "D:/MIT project/2024_06 E4 Data/Cleaned data"
+base_path <- "D:/path_to_folder/Cleaned data"
 stream_folders <- list.dirs(base_path, recursive = FALSE)
-participant_path <- "D:/MIT project/2024_06 E4 Data/participants.csv"
+participant_path <- "D:/path_to_folder/participants.csv"
 participant_data <- read.table(participant_path, header = TRUE, sep = ";", stringsAsFactors = FALSE)
 sessions_order <- c("A", "B", "C", "D")
 
@@ -35,8 +39,8 @@ for (participant_folder in stream_folders) {
     }
 }
 
-# Enregistrement de la data normalisée
-# write.csv(normalised_data, "D:/MIT project/2024_06 E4 Data/normalised_ACC.csv", row.names = FALSE)
+# Normalized data recording
+# write.csv(normalised_data, "D:/path_to_folder/normalised_ACC.csv", row.names = FALSE)
 
 make_test <- function(entry_data) {
     data <- entry_data
@@ -47,16 +51,16 @@ make_test <- function(entry_data) {
         data$Group <- as.factor(data$Group)
     }
 
-    #Test de Mann-Whitney pour isPianist
+    #Test by Mann-Whitney for Ispianist
     print("Mann-Whitney Test for isPianist")
     mw_test_pianist <- wilcox.test(ACC ~ Group, data = data)
     
-    # Global test
+    #GlobalTest
     print("Global Mann-Whitney Test")
     mw_test_global <- wilcox.test(ACC ~ Group, data = data)
     print(mw_test_global)
     
-    # Post hoc test (Dunn Test)
+    #PostHocTest (dunnTest)
     dunn_test <- dunnTest(ACC ~ Group, data = data, method = "bonferroni")
     print("Dunn Test Results")
     print(dunn_test)
@@ -88,6 +92,6 @@ get_stats <- function(data) {
     print(medians)
 }
 
-# Exécuter les fonctions de test
+# Perform the test functions
 make_test(normalised_data)
 # get_stats(normalised_data)

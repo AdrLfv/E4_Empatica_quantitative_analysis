@@ -1,15 +1,17 @@
 library(dplyr)
 library(tibble)
 
-base_path <- "D:/MIT project/2024_06 E4 Data/Cleaned data"
-# Lister tous les dossiers dans le chemin de base
+# This script calculates the mean and standard deviation of the delta heart rate (ΔHR) data for each category of music (calm/dynamic).
+
+base_path <- "D:/path_to_folder/Cleaned data"
+# List all files in the basic path
 stream_folders <- list.dirs(base_path, recursive = FALSE)
 
 get_hrv_data <- function(participant_folder, session) {
     file_path <- file.path(participant_folder, "HR", paste0(session, "_HR.csv"))
     if (!file.exists(file_path)) return(NULL)
     data <- read.csv(file_path, header = TRUE, stringsAsFactors = FALSE, sep = ";")
-    data <- data %>% select(Variation.coefficient) %>% head(60)
+    data <- data %>% select(Delta_Heart_Rate) %>% head(60)
     return(data)
 }
 
@@ -30,13 +32,13 @@ for (participant_folder in stream_folders) {
   }
 }
 
-# Calculer les moyennes et l'écart-type des statistiques pour chaque groupe
+# Calculate the averages and the standard deviation of statistics for each group
 summary_results <- global_data %>%
   group_by(Group) %>%
   summarise(
-    Mean_Variation_Coefficient = mean(Variation.coefficient, na.rm = TRUE),
-    SD_Variation_Coefficient = sd(Variation.coefficient, na.rm = TRUE)
+    Mean_Delta_Heart_Rate = mean(Delta_Heart_Rate, na.rm = TRUE),
+    SD_Delta_Heart_Rate = sd(Delta_Heart_Rate, na.rm = TRUE)
   )
 
-# Afficher les résultats
+# Show the results
 print(summary_results)

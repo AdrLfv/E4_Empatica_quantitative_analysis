@@ -11,9 +11,11 @@ library(dplyr)
 library(FSA)
 library(ggsignif)
 
-base_path <- "D:/MIT project/2024_06 E4 Data/Cleaned data"
+# This script processes accelerometer (ACC) data by calculating the magnitude of acceleration from the x, y, and z components and centering the data for further analysis.
+
+base_path <- "D:/path_to_folder/Cleaned data"
 stream_folders <- list.dirs(base_path, recursive = FALSE)
-participant_path <- "D:/MIT project/2024_06 E4 Data/participants.csv"
+participant_path <- "D:/path_to_folder/participants.csv"
 participant_data <- read.table(participant_path, header = TRUE, sep = ";", stringsAsFactors = FALSE)
 
 center_ACC <- function(participant_folder, session) {

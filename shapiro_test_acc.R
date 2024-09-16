@@ -1,11 +1,14 @@
-base_path <- "D:/MIT project/2024_06 E4 Data/Cleaned data"
-# Lister tous les dossiers dans le chemin de base
+base_path <- "D:/path_to_folder/Cleaned data"
+# List all the files in the basic path
 stream_folders <- list.dirs(base_path, recursive = FALSE)
+
+# This script performs Shapiro-Wilk normality tests on accelerometer (ACC) data to determine if the data follows a normal distribution, 
+# and tracks the minimum and maximum p-values across all tests.
 
 min_p_value_ACC <- 10000
 max_p_value_ACC <- 0
 
-source("D:/MIT project/E4_quantitative_analysis/standardize_ACC.R")
+source("D:/path_to_folder/E4_quantitative_analysis/standardize_ACC.R")
 
 shapirowilk_test <- function(data_file) {  
     # Perform Shapiro-Wilk normality test

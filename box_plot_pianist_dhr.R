@@ -4,12 +4,10 @@ library(ggplot2)
 library(FSA)
 library(ggsignif)
 
-# Base paths
-base_path <- "D:/MIT project/2024_06 E4 Data/Cleaned data"
-participant_file <- "D:/MIT project/2024_06 E4 Data/participants.csv"
+# This script generates box plots to visualize the delta heart rate (ΔHR) across the different pianists.
 
-# Load participant information
-participants <- read.csv(participant_file, header = TRUE, stringsAsFactors = FALSE, sep = ";")
+# Base paths
+base_path <- "D:/path_to_folder/Cleaned data"
 
 # List of folders containing HR data
 stream_folders <- list.dirs(base_path, recursive = FALSE)
@@ -19,7 +17,7 @@ get_hr_data <- function(participant_folder, Pianist) {
     file_path <- file.path(participant_folder, "HR", paste0(Pianist, "_HR.csv"))
     if (!file.exists(file_path)) return(NULL)
     data <- read.csv(file_path, header = TRUE, stringsAsFactors = FALSE, sep = ";")
-    data <- data %>% select(Variation.coefficient)
+    data <- data %>% select(Delta_Heart_Rate)
     return(data)
 }
 
@@ -40,21 +38,21 @@ for (participant_folder in stream_folders) {
     }
 }
 
-# For each familiarity, calculate the mean HR variation, standard deviation, and number of observations
+# For each familiarity, calculate the mean ΔHR, standard deviation, and number of observations
 hr_summary <- hr_data %>%
     group_by(Pianist) %>%
-    summarise(mean_variation = mean(Variation.coefficient),
-              sd_variation = sd(Variation.coefficient),
+    summarise(mean_variation = mean(Delta_Heart_Rate),
+              sd_variation = sd(Delta_Heart_Rate),
               n = n())
-cat("Mean HR variation by Pianist:\n")
+cat("Mean ΔHR by Pianist:\n")
 print(hr_summary)
 
 # Ensure 'Pianist' has the desired order
 hr_data_long <- hr_data %>%
-    pivot_longer(cols = c(Variation.coefficient),
+    pivot_longer(cols = c(Delta_Heart_Rate),
         names_to = "Condition",
         values_to = "HR_variation") %>%
-    mutate(Condition = factor(Condition, levels = c("Variation.coefficient"), labels = c("Hear Rate Coefficient of Variation")),
+    mutate(Condition = factor(Condition, levels = c("Delta_Heart_Rate"), labels = c("Delta Heart Rate")),
         Pianist = factor(Pianist, levels = c("A", "B", "C", "D")))
 
 # Create the box plot
@@ -64,7 +62,7 @@ ggplot(hr_data_long, aes(x = Pianist, y = HR_variation, fill = Pianist)) +
     #geom_jitter(width = 0.2, alpha = 0.5) +
     labs(
             x = "Pianist",
-            y = "Heart Rate Coefficient of Variation",
+            y = "ΔHR",
             fill = "Pianist"
         ) +
     theme(axis.text.x = element_text(angle = 0, hjust = 1),
@@ -75,4 +73,4 @@ ggplot(hr_data_long, aes(x = Pianist, y = HR_variation, fill = Pianist)) +
 
 
 # Sauvegarder le graphique en local
-ggsave("D:/MIT project/2024_06 E4 Data/hrv_pianist_box_plot.png", width = 10, height = 6)
+ggsave("D:/path_to_folder/hrv_pianist_box_plot.png", width = 10, height = 6)

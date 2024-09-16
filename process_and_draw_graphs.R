@@ -2,23 +2,25 @@
 if (!require("dplyr")) install.packages("dplyr")
 if (!require("ggplot2")) install.packages("ggplot2")
 
-# chargerLesPackages
 library(dplyr)
 library(ggplot2)
 
+# This script processes and synchronizes E4 data streams (HR, EDA, ACC) with video recordings, 
+# generates visualizations using ggplot2, and saves the cleaned data for further analysis.
+
 # Define the basic path
-base_path <- "D:/MIT project/2024_06 E4 Data/E4 streams"
-clear_data_path <- "D:/MIT project/2024_06 E4 Data/Cleaned data"
+base_path <- "D:/path_to_folder/E4 streams"
+clear_data_path <- "D:/path_to_folder/Cleaned data"
 
 # Check and create the "Cleared Data" folder if there is no
 if (!dir.exists(clear_data_path)) {
   dir.create(clear_data_path, recursive = TRUE)
 }
 
-video_timecodes_path <- "D:/MIT project/2024_06 E4 Data/videos timecodes.csv"
+video_timecodes_path <- "D:/path_to_folder/videos timecodes.csv"
 videos_timecodes <- read.csv(video_timecodes_path, header = FALSE, stringsAsFactors = FALSE, sep = ";")
 
-participant_info_path <- "D:/MIT project/2024_06 E4 Data/participants.csv"
+participant_info_path <- "D:/path_to_folder/participants.csv"
 participant_info <- read.csv(participant_info_path, header = TRUE, stringsAsFactors = FALSE, sep = ";")
 
 # List all files in the basic path
@@ -78,7 +80,7 @@ process_HR_EDA <- function(folder, file_name) {
           data[1, 4] <- "Timecode"
           data[1, 5] <- "In video timecode"
           
-          # Create a file for each participant in "D:/MIT Project/2024_06 E4 Data/Clear Data"
+          # Create a file for each participant in "D:/path_to_folder/Clear Data"
           participant <- substr(basename(folder), 1, 3)  # Extract the first 3 characters from the name of the folder
           participant_folder <- file.path(clear_data_path, participant, file_name)  # Subdossier file_name for each participant
           dir.create(participant_folder, showWarnings = FALSE, recursive = TRUE)
@@ -94,8 +96,8 @@ process_HR_EDA <- function(folder, file_name) {
           EDA_y_lim_max = 10 # To modify regarding the EDA max value
           HR_y_lim_min = 50 # To modify regarding the HR min value
           HR_y_lim_max = 170 # To modify regarding the HR max value      
-          HR_var_coeff_y_lim_min = -120 # To modify regarding the HR variation coefficient min value
-          HR_var_coeff_y_lim_max = 120 # To modify regarding the HR variation coefficient max value
+          HR_var_y_lim_min = -120 # To modify regarding the Delta Heart Rate min value
+          HR_var_y_lim_max = 120 # To modify regarding the Delta Heart Rate max value
           # Temporary values ​​for Edr_min and Edr_max
           EDR_min = EDA_y_lim_max
           EDR_max = EDA_y_lim_min
@@ -130,12 +132,12 @@ process_HR_EDA <- function(folder, file_name) {
             time_sequence <- seq(from = timestamp_video, by = 1/data[2, 1], length.out = matching_end_index - matching_start_index + 1)
             time_sequence_formatted <- format(time_sequence, "%H:%M:%S")
             
-            # V1 = Time, V2 = HR, V3 = Variation coefficient
+            # V1 = Time, V2 = HR, V3 = Delta Heart Rate
             if (length(matching_start_index) > 0 & length(matching_end_index) > 0) {
               passage_data <- data.frame(
                 V1 = time_sequence_formatted,
                 V2 = data$V1[matching_start_index:matching_end_index],
-                #Calculation of the variation coefficient
+                #Calculation of the Delta Heart Rate
                 V3 = data$V1[matching_start_index:matching_end_index] - data$V1[matching_start_index]
               )
               passage_data_csv <- passage_data
@@ -155,8 +157,8 @@ process_HR_EDA <- function(folder, file_name) {
                 y_lim <- c(HR_y_lim_min, HR_y_lim_max)
                 y_unit <- "Pulse (bpm)"
                 y_breaks <- seq(HR_y_lim_min, HR_y_lim_max, by = 10)  # Intervals every 10 BPM
-                y_lim_variation <- c(HR_var_coeff_y_lim_min, HR_var_coeff_y_lim_max, by = 10)
-                y_breaks_variation <- seq(HR_var_coeff_y_lim_min, HR_var_coeff_y_lim_max, by = 10)  # Intervals every 10 BPM
+                y_lim_variation <- c(HR_var_y_lim_min, HR_var_y_lim_max, by = 10)
+                y_breaks_variation <- seq(HR_var_y_lim_min, HR_var_y_lim_max, by = 10)  # Intervals every 10 BPM
               }
               else if (file_name == "EDA") {
                 title = "Electrodermal activity over Time"
@@ -165,19 +167,19 @@ process_HR_EDA <- function(folder, file_name) {
                 y_breaks <- seq(EDA_y_lim_min, EDA_y_lim_max, by = 1)  # Intervals every 1 μs
               }
               # If the value in participants.
-              if (participant_info[participant_info$ID == participant, session] == "XX") {
+              if (participant_info[participant_info$ID == participant, session] == "A") {
                 plot_color <- "#cf0000"
-              } else if (participant_info[participant_info$ID == participant, session] == "Marvin"){
+              } else if (participant_info[participant_info$ID == participant, session] == "B"){
                 plot_color <- "#009c0b"
-              } else if (participant_info[participant_info$ID == participant, session] == "Donal"){
+              } else if (participant_info[participant_info$ID == participant, session] == "C"){
                 plot_color <- "#1d00cf"
-              } else if (participant_info[participant_info$ID == participant, session] == "Toussaint"){
+              } else if (participant_info[participant_info$ID == participant, session] == "D"){
                 plot_color <- "#beb300"
-              } else if (participant_info[participant_info$ID == participant, session] == "Alisa"){
+              } else if (participant_info[participant_info$ID == participant, session] == "A-P05"){
                 plot_color <- "#cf00b9"
-              } else if (participant_info[participant_info$ID == participant, session] == "JoeP"){
+              } else if (participant_info[participant_info$ID == participant, session] == "A-P07"){
                 plot_color <- "#d87f00"
-              } else if (participant_info[participant_info$ID == participant, session] == "Peter"){
+              } else if (participant_info[participant_info$ID == participant, session] == "A-P011"){
                 plot_color <- "#00b4cf"
               }
               else {
@@ -216,28 +218,28 @@ process_HR_EDA <- function(folder, file_name) {
               ggsave(filename = file.path(participant_folder, paste0(session, "_pulse_plot.png")),
                      plot = p, width = 10, height = 5, units = "in")
               if (file_name == "HR") {
-                # Addition of a variable for the variation coefficient
+                # Addition of a variable for the Delta Heart Rate
                 plot_data_variation <- data.frame(
                   Time = passage_data$V1,
-                  VariationCoefficient = passage_data$V3
+                  DeltaHR = passage_data$V3
                 )
                 
-                # Creation of a graph for the variation coefficient
-                p_variation <- ggplot(plot_data_variation, aes(x = Time, y = VariationCoefficient)) +
+                # Creation of a graph for the Delta Heart Rate
+                p_variation <- ggplot(plot_data_variation, aes(x = Time, y = DeltaHR)) +
                   geom_line(color = plot_color) +
                   geom_hline(yintercept = 0, color = "red", linetype = "dashed") +  # Ligne rouge en pointillés à y=0
-                  geom_ribbon(aes(ymin = pmin(VariationCoefficient, 0), ymax = 0), fill = "red", alpha = 0.2) +  # Zone rouge pour les valeurs négatives
-                  geom_ribbon(aes(ymin = 0, ymax = pmax(VariationCoefficient, 0)), fill = "green", alpha = 0.2) +  # Zone verte pour les valeurs positives
-                  labs(title = paste("HR variation coefficient over Time - participant", participant, "-", session_number_in_letters, "session", "-", session),
+                  geom_ribbon(aes(ymin = pmin(DeltaHR, 0), ymax = 0), fill = "red", alpha = 0.2) +  # Zone rouge pour les valeurs négatives
+                  geom_ribbon(aes(ymin = 0, ymax = pmax(DeltaHR, 0)), fill = "green", alpha = 0.2) +  # Zone verte pour les valeurs positives
+                  labs(title = paste("Delta Heart Rate over Time - participant", participant, "-", session_number_in_letters, "session", "-", session),
                       x = "Time (hh:mm:ss)",
-                      y = "Variation Coefficient") +
+                      y = "Delta Heart Rate") +
                   scale_x_datetime(date_labels = "%H:%M:%S", date_breaks = "10 sec") +
                   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
                   scale_y_continuous(limits = y_lim_variation, breaks = y_breaks_variation)
 
                 
                 # Graphic backup
-                ggsave(filename = file.path(participant_folder, paste0(session, "_variation_coefficient_plot.png")),
+                ggsave(filename = file.path(participant_folder, paste0(session, "_delta_hr_plot.png")),
                        plot = p_variation, width = 10, height = 5, units = "in")
               }
               # We update Edr_min and Edr_max
@@ -249,7 +251,7 @@ process_HR_EDA <- function(folder, file_name) {
               else if (file_name == "HR") {
                 names(passage_data_csv)[names(passage_data) == 'V1'] <- 'Time'
                 names(passage_data_csv)[names(passage_data) == 'V2'] <- 'HR'
-                names(passage_data_csv)[names(passage_data) == 'V3'] <- 'Variation coefficient'
+                names(passage_data_csv)[names(passage_data) == 'V3'] <- 'Delta_Heart_Rate'
                 
                 write.table(passage_data_csv, file = file.path(participant_folder, paste0(session, "_HR.csv")), row.names = FALSE, sep = ";", col.names = TRUE)
               } 
@@ -269,7 +271,7 @@ process_HR_EDA <- function(folder, file_name) {
               
               names(EDR_passage_data)[names(EDR_passage_data) == 'V1'] <- 'Time'
               names(EDR_passage_data)[names(EDR_passage_data) == 'V2'] <- 'EDA'
-              names(EDR_passage_data)[names(EDR_passage_data) == 'V3'] <- 'Variation coefficient'
+              names(EDR_passage_data)[names(EDR_passage_data) == 'V3'] <- 'Delta_Heart_Rate'
               names(EDR_passage_data)[names(EDR_passage_data) == 'V4'] <- 'Standardized EDA'
               
               write.table(EDR_passage_data, file = file.path(participant_folder, paste0(session, "_EDA.csv")), row.names = FALSE, sep = ";", col.names = TRUE)
@@ -331,7 +333,7 @@ process_ACC <- function(folder) {
           data[1, 6] <- "Timecode"
           data[1, 7] <- "In video timecode"
           
-          # Create a file for each participant in "D:/MIT Project/2024_06 E4 Data/Clear Data"
+          # Create a file for each participant in "D:/path_to_folder/Clear Data"
           participant <- substr(basename(folder), 1, 3)  # Extract the first 3 characters from the name of the folder
           participant_folder <- file.path(clear_data_path, participant, file_name)  # Subdossier file_name for each participant
           dir.create(participant_folder, showWarnings = FALSE, recursive = TRUE)
@@ -406,19 +408,19 @@ process_ACC <- function(folder) {
               }
               
               # If the value in participants.
-              if (participant_info[participant_info$ID == participant, session] == "XX") {
+              if (participant_info[participant_info$ID == participant, session] == "A") {
                 plot_color <- "#cf0000"
-              } else if (participant_info[participant_info$ID == participant, session] == "Marvin"){
+              } else if (participant_info[participant_info$ID == participant, session] == "B"){
                 plot_color <- "#009c0b"
-              } else if (participant_info[participant_info$ID == participant, session] == "Donal"){
+              } else if (participant_info[participant_info$ID == participant, session] == "C"){
                 plot_color <- "#1d00cf"
-              } else if (participant_info[participant_info$ID == participant, session] == "Toussaint"){
+              } else if (participant_info[participant_info$ID == participant, session] == "D"){
                 plot_color <- "#beb300"
-              } else if (participant_info[participant_info$ID == participant, session] == "Alisa"){
+              } else if (participant_info[participant_info$ID == participant, session] == "A-P05"){
                 plot_color <- "#cf00b9"
-              } else if (participant_info[participant_info$ID == participant, session] == "JoeP"){
+              } else if (participant_info[participant_info$ID == participant, session] == "A-P07"){
                 plot_color <- "#d87f00"
-              } else if (participant_info[participant_info$ID == participant, session] == "Peter"){
+              } else if (participant_info[participant_info$ID == participant, session] == "A-P011"){
                 plot_color <- "#00b4cf"
               }
               else {
@@ -485,11 +487,11 @@ for (folder in stream_folders) {
   cat(paste("\nProcessing", participant, "HR data"))
   process_HR_EDA(folder, "HR")
   
-  # cat(paste("\nProcessing", participant, "EDA data"))
-  # eda_data <- process_HR_EDA(folder, "EDA")
+  cat(paste("\nProcessing", participant, "EDA data"))
+  eda_data <- process_HR_EDA(folder, "EDA")
   
-  #cat(paste("\nProcessing", participant, "accelerometer data"))
-  #eda_data <- process_ACC(folder)
+  cat(paste("\nProcessing", participant, "accelerometer data"))
+  eda_data <- process_ACC(folder)
 }
 
 cat("\nDone!")
