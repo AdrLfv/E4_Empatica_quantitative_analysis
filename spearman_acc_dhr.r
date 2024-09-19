@@ -8,20 +8,19 @@ library(ggplot2)
 
 # This script performs a Spearman correlation test between accelerometer data (ACC) and delta heart rate (ΔHR) data.
 
-source("D:/path_to_folder/E4_quantitative_analysis/center_ACC.R")
+source("center_ACC.R")
 
-base_path <- "D:/path_to_folder/Cleaned data"
+base_path <- "cleaned_data"
 stream_folders <- list.dirs(base_path, recursive = FALSE)
 
 
-# Function to retrieve HR global_data
+# Function to retrieve dHR data
 get_hr_data <- function(participant_folder, session) {
-    file_path <- file.path(participant_folder, "HR", paste0(session, "_HR.csv"))
+    file_path <- file.path(participant_folder, "HR", paste0(session, "_HR.rds"))
     if (!file.exists(file_path)) return(NULL)
-    global_data <- read.csv(file_path, header = TRUE, stringsAsFactors = FALSE, sep = ";")
-    # global_data <- global_data %>% select(Delta_Heart_Rate) %>% head(60)
-    global_data <- global_data %>% select(Delta_Heart_Rate)
-    return(global_data)
+    data <- readRDS(file_path)
+    data <- data %>% select(Delta_Heart_Rate)
+    return(data)
 }
 
 sessions <- c("A", "B", "C", "D")
@@ -51,19 +50,19 @@ for (participant_folder in stream_folders) {
 }
 
 # Normalized Global_Data Registration
-write.table(global_data, "D:/path_to_folder/hr_acc.csv", row.names = FALSE, sep=";")
+# write.table(global_data, "hr_acc.csv", row.names = FALSE, sep=";")
 
 # Perform the Spearman test
 spearman_test <- cor.test(global_data$ACC, global_data$Delta_Heart_Rate, method = "spearman")
 print(spearman_test)
 
 # Calculate Kendall's Tau
-kendall_tau <- cor.test(global_data$ACC, global_data$Delta_Heart_Rate, method = "kendall")
-cat("Kendall's tau:", kendall_tau$estimate, "\n")
+# kendall_tau <- cor.test(global_data$ACC, global_data$Delta_Heart_Rate, method = "kendall")
+# cat("Kendall's tau:", kendall_tau$estimate, "\n")
 
 # Calculate Somers' D
-somers_d <- somers2(global_data$ACC, global_data$Delta_Heart_Rate)
-cat("Somers' D:", somers_d$Dxy, "\n")
+# somers_d <- somers2(global_data$ACC, global_data$Delta_Heart_Rate)
+# cat("Somers' D:", somers_d$Dxy, "\n")
 
 # # Plot the two curves on the same graphic (session_acc and session_hr_data)
         # # ACC

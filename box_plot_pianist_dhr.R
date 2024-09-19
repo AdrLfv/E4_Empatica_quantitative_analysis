@@ -7,16 +7,16 @@ library(ggsignif)
 # This script generates box plots to visualize the delta heart rate (ΔHR) across the different pianists.
 
 # Base paths
-base_path <- "D:/path_to_folder/Cleaned data"
+base_path <- "cleaned_data"
 
 # List of folders containing HR data
 stream_folders <- list.dirs(base_path, recursive = FALSE)
 
 # Function to retrieve HR data
 get_hr_data <- function(participant_folder, Pianist) {
-    file_path <- file.path(participant_folder, "HR", paste0(Pianist, "_HR.csv"))
+    file_path <- file.path(participant_folder, "HR", paste0(session, "_HR.rds"))
     if (!file.exists(file_path)) return(NULL)
-    data <- read.csv(file_path, header = TRUE, stringsAsFactors = FALSE, sep = ";")
+    data <- readRDS(file_path)
     data <- data %>% select(Delta_Heart_Rate)
     return(data)
 }
@@ -73,4 +73,4 @@ ggplot(hr_data_long, aes(x = Pianist, y = HR_variation, fill = Pianist)) +
 
 
 # Sauvegarder le graphique en local
-ggsave("D:/path_to_folder/hrv_pianist_box_plot.png", width = 10, height = 6)
+ggsave("plots/hrv_pianist_box_plot.png", width = 10, height = 6)

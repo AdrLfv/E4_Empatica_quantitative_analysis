@@ -1,3 +1,7 @@
 .Rproj.user
 .Rhistory
 .RData
+.cleaned_data
+.plots
+.data_csv
+E4_quantitative_analysis.Rproj

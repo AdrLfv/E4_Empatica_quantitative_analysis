@@ -5,22 +5,20 @@ library(FSA)
 library(ggsignif)
 
 # This script generates box plots to visualize the delta heart rate (ΔHR) across different sessions and participants.
-
+if (!dir.exists("plots")) {
+    dir.create("plots")
+}
 # Base paths
-base_path <- "D:/path_to_folder/Cleaned data"
-participant_file <- "D:/path_to_folder/participants.csv"
-
-# Load participant information
-participant_data <- read.csv(participant_file, header = TRUE, stringsAsFactors = FALSE, sep = ";")
-
+base_path <- "cleaned_data"
+participants_data <- readRDS("data_rds/participants.rds")
 # List of folders containing HR data
 stream_folders <- list.dirs(base_path, recursive = FALSE)
 
 # Function to retrieve HR data
 get_hr_data <- function(participant_folder, session) {
-    file_path <- file.path(participant_folder, "HR", paste0(session, "_HR.csv"))
+    file_path <- file.path(participant_folder, "HR", paste0(session, "_HR.rds"))
     if (!file.exists(file_path)) return(NULL)
-    data <- read.csv(file_path, header = TRUE, stringsAsFactors = FALSE, sep = ";")
+    data <- readRDS(file_path)
     data <- data %>% select(Delta_Heart_Rate)
     return(data)
 }
@@ -30,7 +28,7 @@ hr_data <- data.frame()
 
 for (participant_folder in stream_folders) {
     participant_id <- substr(basename(participant_folder), 1, 3)
-    participant_order <- participant_data[participant_data$ID == participant_id, "Order"]
+    participant_order <- participants_data[participants_data$ID == participant_id, "Order"]
 
     for (i in 1:4) {
       session <- substr(participant_order, i, i)
@@ -80,4 +78,4 @@ ggplot(hr_data_long, aes(x = Session, y = HR_variation, fill = Session)) +
 
 
 # Sauvegarder le graphique en local
-ggsave("D:/path_to_folder/hrv_order_box_plot.png", width = 10, height = 6)
+ggsave("plots/hrv_order_box_plot.png", width = 10, height = 6)

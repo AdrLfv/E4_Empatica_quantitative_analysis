@@ -13,15 +13,15 @@ library(ggsignif)
 
 # This script processes accelerometer (ACC) data by calculating the magnitude of acceleration from the x, y, and z components and centering the data for further analysis.
 
-base_path <- "D:/path_to_folder/Cleaned data"
+base_path <- "cleaned_data"
 stream_folders <- list.dirs(base_path, recursive = FALSE)
-participant_path <- "D:/path_to_folder/participants.csv"
-participant_data <- read.table(participant_path, header = TRUE, sep = ";", stringsAsFactors = FALSE)
+participants_data <- readRDS("data_rds/participants.rds")
 
 center_ACC <- function(participant_folder, session) {
-  file_path <- file.path(participant_folder, "ACC", paste(session, "_ACC.csv", sep=""))
-  data_file <- read.table(file_path, header = TRUE, stringsAsFactors = FALSE, sep = ";") 
-  acc_data <- data_file 
+
+  file_path <- file.path(participant_folder, "ACC", paste0(session, "_ACC.rds"))
+  if (!file.exists(file_path)) return(NULL)
+  acc_data <- readRDS(file_path)
   acc_data$time_seconds <- as.numeric(as.POSIXct(acc_data$Time, format = "%H:%M:%S"))
 
   acc_data <- acc_data %>%
@@ -35,9 +35,6 @@ center_ACC <- function(participant_folder, session) {
   # Typical deviation method
   acc_data$ACC = acc_data$ACC - mean(acc_data$ACC)
   acc_data <- acc_data %>% select(ACC)
-
-  # Save standard data
-  # write.csv(acc_data, file.path(participant_folder, "ACC", paste0(session, "_ACC_normalised.csv")), row.names = FALSE)
 
   return(acc_data)
 }

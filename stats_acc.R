@@ -5,42 +5,45 @@ library(FSA)
 library(ggsignif)
 library(Hmisc)
 library(ggplot2)
+library(tidyr)
 
-# This script processes accelerometer (ACC) data by calculating the magnitude of acceleration from the x, y, and z components and centering the data for further analysis.
+# This script processes accelerometer (ACC) data by calculating the magnitude of acceleration 
+# from the x, y, and z components and centering the data for further analysis.
 
-source("D:/path_to_folder/E4_quantitative_analysis/center_ACC.R")
+source("center_ACC.R")
 
-base_path <- "D:/path_to_folder/Cleaned data"
+base_path <- "cleaned_data"
 stream_folders <- list.dirs(base_path, recursive = FALSE)
 
 sessions <- c("A", "B", "C", "D")
-global_data <- data.frame()
+mean_data <- data.frame()
+sd_data <- data.frame()
 
 # Browse the participants' file
 for (participant_folder in stream_folders) {
     participant_id <- substr(basename(participant_folder), 1, 3)
-    # mean_acc_cumul <- 0 
-    # print(participant_id)
-    # sums_list <- list()
+    
     for (i in 1:4) {
         session_acc <- center_ACC(participant_folder, sessions[i]) %>% head(60*32) %>% pull()
-        # sum of the absolute value of all the values ​​of acceleration
-        # mean_acc_cumul <- mean_acc_cumul + sum(abs(session_acc))/length(session_acc)  
-        # sums_list[[i]] <- sum(abs(session_acc))/(length(session_acc)*100)
+
+        mean <- mean(session_acc)
         standard_deviation <- sd(session_acc)
-        cat(standard_deviation, ";")
-        # global_data <- rbind(global_data, data.frame(Participant = participant_id, Session = sessions[i], ACC = session_acc))
+
+        mean_data <- rbind(mean_data, data.frame(Participant = participant_id, Session = sessions[i], Mean = mean))
+        sd_data <- rbind(sd_data, data.frame(Participant = participant_id, Session = sessions[i], SD = standard_deviation))
     }
-    print("\n")
-    # for (i in 1:4) {
-    #     cat(sums_list[[i]], ";", sep="")
-    # }
-    # mean_acc <- (mean_acc_cumul / 4)/100
-    # cat(participant_id, ";", mean_acc, "\n", sep="")
 }
 
+# Pivot the data to have Participants as rows and Sessions as columns
+mean_data_wide <- mean_data %>% 
+    pivot_wider(names_from = Session, values_from = Mean)
+sd_data_wide <- sd_data %>%
+    pivot_wider(names_from = Session, values_from = SD)
+
 # Display the overall average of the variation
-# mean_variation <- mean(global_data$ACC, na.rm = TRUE)
-# standard_deviation <- sd(global_data$ACC, na.rm = TRUE)
-# cat("Mean Delta_Heart_Rate:", mean_variation, "\n")
-# cat("Standard Deviation:", standard_deviation, "\n")
+print("Mean of Acceleration Data:")
+print(mean_data_wide, n = 28)
+
+# Display the overall standard deviation of the variation
+print("Standard Deviation of Acceleration Data:")
+print(sd_data_wide, n = 28)

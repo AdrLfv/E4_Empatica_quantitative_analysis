@@ -3,14 +3,14 @@ library(tibble)
 
 # This script calculates the mean and standard deviation of the delta heart rate (ΔHR) data for each category of music (calm/dynamic).
 
-base_path <- "D:/path_to_folder/Cleaned data"
+base_path <- "cleaned_data"
 # List all files in the basic path
 stream_folders <- list.dirs(base_path, recursive = FALSE)
 
 get_hrv_data <- function(participant_folder, session) {
-    file_path <- file.path(participant_folder, "HR", paste0(session, "_HR.csv"))
+    file_path <- file.path(participant_folder, "HR", paste0(session, "_HR.rds"))
     if (!file.exists(file_path)) return(NULL)
-    data <- read.csv(file_path, header = TRUE, stringsAsFactors = FALSE, sep = ";")
+    data <- readRDS(file_path)
     data <- data %>% select(Delta_Heart_Rate) %>% head(60)
     return(data)
 }

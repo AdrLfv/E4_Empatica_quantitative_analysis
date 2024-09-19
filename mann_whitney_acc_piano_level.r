@@ -10,19 +10,18 @@ library(rstatix)
 # the ACC data and then conduct a Mann-Whitney U test to compare the accelerometer data 
 # between different groups (e.g., pianists vs. non-pianists).
 
-source("D:/path_to_folder/E4_quantitative_analysis/center_ACC.R")
+source("center_ACC.R")
 
-base_path <- "D:/path_to_folder/Cleaned data"
+base_path <- "cleaned_data"
 stream_folders <- list.dirs(base_path, recursive = FALSE)
-participant_path <- "D:/path_to_folder/participants.csv"
-participant_data <- read.table(participant_path, header = TRUE, sep = ";", stringsAsFactors = FALSE)
+participants_data <- readRDS("data_rds/participants.rds")
 sessions_order <- c("A", "B", "C", "D")
 
 normalised_data <- data.frame()
 
 for (participant_folder in stream_folders) {
     participant_id <- substr(basename(participant_folder), 1, 3)
-    participant_info <- participant_data %>% filter(ID == participant_id)
+    participant_info <- participants_data %>% filter(ID == participant_id)
     if (nrow(participant_info) == 0) next
     isPianist <- substr(participant_info$isPianist, 1, 1)
 
@@ -39,11 +38,7 @@ for (participant_folder in stream_folders) {
     }
 }
 
-# Normalized data recording
-# write.csv(normalised_data, "D:/path_to_folder/normalised_ACC.csv", row.names = FALSE)
-
-make_test <- function(entry_data) {
-    data <- entry_data
+make_tests <- function(data) {
     if (!is.numeric(data$ACC)) {
         data$ACC <- as.numeric(data$ACC)
     }
@@ -93,5 +88,5 @@ get_stats <- function(data) {
 }
 
 # Perform the test functions
-make_test(normalised_data)
+make_tests(normalised_data)
 # get_stats(normalised_data)

@@ -7,12 +7,8 @@ library(ggsignif)
 # This script performs a Kruskal-Wallis test to analyze the relationship between familiarity levels and delta heart rate (ΔHR) 
 
 # Base paths
-base_path <- "D:/path_to_folder/Cleaned data"
-participant_file <- "D:/path_to_folder/participants.csv"
-
-# Load participant information
-participants_data <- read.csv(participant_file, header = TRUE, stringsAsFactors = FALSE, sep = ";")
-
+base_path <- "cleaned_data"
+participants_data <- readRDS("data_rds/participants.rds")
 # List of folders containing HR data
 stream_folders <- list.dirs(base_path, recursive = FALSE)
 # Combine HR data with participant information
@@ -20,9 +16,9 @@ hr_data <- data.frame()
 
 # Function to retrieve HR data
 get_hr_data <- function(participant_folder, session) {
-    file_path <- file.path(participant_folder, "HR", paste0(session, "_HR.csv"))
+    file_path <- file.path(participant_folder, "HR", paste0(session, "_HR.rds"))
     if (!file.exists(file_path)) return(NULL)
-    data <- read.csv(file_path, header = TRUE, stringsAsFactors = FALSE, sep = ";")
+    data <- readRDS(file_path)
     data <- data %>% select(Delta_Heart_Rate) %>% head(60)
     return(data)
 }
@@ -63,7 +59,7 @@ calculate_Kruskal <- function(chosen_vital_status) {
 
     for (participant_folder in stream_folders) {
         participant_id <- substr(basename(participant_folder), 1, 3)
-        participant_info <- participants_data %>% filter(ID == participant_id)
+        participant_info <- subset(participants_data, ID == participant_id)
 
         for (session in pianists) {
             familiarity_data <- get_familiarity(participant_info$Familiarity, session)
@@ -80,7 +76,7 @@ calculate_Kruskal <- function(chosen_vital_status) {
     }
 
     #Filter hr_data to keep only the considered pianists not in the list of excluded participants
-    hr_data <- hr_data %>% filter(Familiarity != "Unknown" & Familiarity != "Self")
+    hr_data <- subset(hr_data, Familiarity != "Unknown" & Familiarity != "Self")
 
     # Perform Kruskal-Wallis test
     kruskal_test <- kruskal.test(Delta_Heart_Rate ~ Familiarity, data = hr_data)
@@ -94,7 +90,7 @@ calculate_Kruskal <- function(chosen_vital_status) {
     mutate(Condition = factor(Condition, levels = c("Delta_Heart_Rate"), labels = c("HRCV")),
            Familiarity = factor(Familiarity, levels = c("Stranger", "Heard of/Acquaintance", "Family/Friend", "Self")))
 
-    # Créer le box plot avec des couleurs différentes pour chaque session
+    # Create the plot box with different colors for each session
     p_box_plot <- ggplot(hr_data_long, aes(x = Familiarity, y = HRCV, fill = Familiarity)) +
         geom_boxplot(alpha = 0.7, outlier.shape = NA) +
         #geom_jitter(width = 0.2, alpha = 0.5) +
@@ -105,10 +101,10 @@ calculate_Kruskal <- function(chosen_vital_status) {
             text = element_text(family = "Arial", size = 18)) +
 
         scale_fill_brewer(palette = "Set3")  +
-        coord_cartesian(ylim = c(-20, 15)) +  # Définir les limites de l'axe y
-        scale_y_continuous(breaks = seq(-20, 15, by = 5))  # Définir les indices de l'axe y toutes les 5 unités
-    # save in "D:/path_to_folder/boxplot_hrv_familiarity_ + "".png"
-    ggsave(paste("D:/path_to_folder/boxplot_hrv_familiarity_", chosen_vital_status, ".png", sep=""), plot = p_box_plot, width = 8, height = 6)
+        coord_cartesian(ylim = c(-20, 15)) +  # Define the limits of the Y axis
+        scale_y_continuous(breaks = seq(-20, 15, by = 5))  # Define the clues of the Y axis every 5 units
+    # save in "boxplot_hrv_familiarity_ + "".png"
+    ggsave(paste("plots/boxplot_hrv_familiarity_", chosen_vital_status, ".png", sep=""), plot = p_box_plot, width = 8, height = 6)
 
 
     # # # Post-hoc analysis with Dunn's test

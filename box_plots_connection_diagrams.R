@@ -7,12 +7,9 @@ library(tidyr)   # To transform data
 # This script generates box plots to visualize the felt connections before and after sessions for different familiarity levels.
 
 # Define the path to the Excel file
-base_path <- "D:/path_to_folder/Cleaned data"
-participant_file <- "D:/path_to_folder/participants.csv"
+base_path <- "cleaned_data"
 stream_folders <- list.dirs(base_path, recursive = FALSE)
-
-# Read data from the Excel file
-participants_data <- read.csv(participant_file, header = TRUE, stringsAsFactors = FALSE, sep = ";")
+participants_data <- readRDS("data_rds/participants.rds")
 
 #Create a dictionary to store the familiarity and color of each participant
 participants_colors_familiarity <- list()
@@ -97,7 +94,7 @@ ggplot(data_A_long, aes(x = Condition, y = Connection)) +
   theme(axis.text.x = element_text(angle = 0, hjust = 0.5),
         text = element_text(family = "Arial", size = 18)) +
   guides(color = guide_legend(title = "Familiarity"))
-ggsave("D:/path_to_folder/connection_plot_A.png", width = 10, height = 6)
+ggsave("plots/connection_plot_A.png", width = 10, height = 6)
 
 # Update the data for the B session with the correct order
 data_B_long <- data_B_long %>%
@@ -114,4 +111,4 @@ ggplot(data_B_long, aes(x = Condition, y = Connection)) +
   theme(axis.text.x = element_text(angle = 0, hjust = 0.5),
         text = element_text(family = "Arial", size = 18)) +
   guides(color = guide_legend(title = "Familiarity"))
-ggsave("D:/path_to_folder/connection_plot_B.png", width = 10, height = 6)
+ggsave("plots/connection_plot_B.png", width = 10, height = 6)

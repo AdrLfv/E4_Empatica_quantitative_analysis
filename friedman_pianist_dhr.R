@@ -9,20 +9,16 @@ library(ggsignif)
 # and conducts post hoc Wilcoxon tests if the results are significant.
 
 # Basic paths
-base_path <- "D:/path_to_folder/Cleaned data"
-participant_file <- "D:/path_to_folder/participants.csv"
-
-# Load participants' information
-participant_data <- read.csv(participant_file, header = TRUE, stringsAsFactors = FALSE, sep = ";")
-
+base_path <- "cleaned_data"
+participants_data <- readRDS("data_rds/participants.rds")
 # List of files containing HR data
 stream_folders <- list.dirs(base_path, recursive = FALSE)
 
 # Function to recover HR data
 get_hr_data <- function(participant_folder, session, participant) {
-    file_path <- file.path(participant_folder, "HR", paste0(session, "_HR.csv"))
+    file_path <- file.path(participant_folder, "HR", paste0(session, "_HR.rds"))
     if (!file.exists(file_path)) return(NULL)
-    data <- read.csv(file_path, header = TRUE, stringsAsFactors = FALSE, sep = ";")
+    data <- readRDS(file_path)
     data <- data %>% 
         select(Delta_Heart_Rate) %>% 
         head(60) %>%  # Ensure that we take the first 60 lines only

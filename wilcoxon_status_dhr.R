@@ -4,15 +4,18 @@ library(tidyverse)
 library(openxlsx)
 library(ggplot2)
 
-# This script performs Wilcoxon tests and calculates summary statistics for the delta heart rate (ΔHR) data
+
+# This script performs a Wilcoxon test to verify the significancy of the living status (alive/deceased) on the ΔHR 
+# focusing only on the familiarity level "stranger" to maintain consistency in participant numbers.
+# It also calculates summary statistics for the delta heart rate (ΔHR) data and generates the Box Plot of "ΔHR" for B vs C 
+# (deceased-non pro vs alive-pro) and C vs D (alive-pro vs deceased-pro) comparisons.
 
 # Define the basic path
-base_path <- "D:/path_to_folder/Cleaned data"
+base_path <- "cleaned_data"
 stream_folders <- list.dirs(base_path, recursive = FALSE)
 
 # Load participant information
-participant_file <- "D:/path_to_folder/participants.csv"
-participants_data <- read.csv(participant_file, header = TRUE, stringsAsFactors = FALSE, sep = ";")
+participants_data <- readRDS("data_rds/participants.rds")
 
 # A: alive, nonpro
 # B: deceased, nonpro
@@ -20,12 +23,13 @@ participants_data <- read.csv(participant_file, header = TRUE, stringsAsFactors 
 # D: deceased, pro
 
 get_session_data <- function(participant_folder, session, participant_id) {
-  file_path <- file.path(participant_folder, "HR", paste0(session, "_HR.csv"))
-    data_file <- read.csv(file_path, header = TRUE, stringsAsFactors = FALSE, sep = ";")
+    file_path <- file.path(participant_folder, "HR", paste0(session, "_HR.rds"))
+    if (!file.exists(file_path)) return(NULL)
+    data <- readRDS(file_path)
     music_type <- ifelse(session %in% c("A", "B"), "Calm", "Dynamic")
     level <- ifelse(session %in% c("A", "B"), "Non-pro", "Pro")
     status <- ifelse(session %in% c("A", "C"), "Alive", "Deceased")
-    data <- data_file %>%
+    data <- data %>%
         select(Delta_Heart_Rate) %>%
         head(60) %>%
         mutate(Participant = participant_id, Session = session, Music_type = music_type, Level = level, Status = status)
@@ -88,7 +92,7 @@ p_vital_status <- ggplot(filtered_data, aes(x = Comparison, y = Delta_Heart_Rate
   scale_y_continuous(breaks = seq(-10, 10, by = 5))  # Adjust the labels of the Y axis
 
 # Save the BOX PLOT
-ggsave("D:/path_to_folder/boxplot_C_D_vital_status.png", plot = p_vital_status, width = 10, height = 6)
+ggsave("plots/boxplot_C_D_vital_status.png", plot = p_vital_status, width = 10, height = 6)
 
 # # Generate and save the boxplot for vital status
 # p_vitality <- ggplot(all_data, aes(x = Status, y = Delta_Heart_Rate, fill = Status)) +
@@ -99,7 +103,7 @@ ggsave("D:/path_to_folder/boxplot_C_D_vital_status.png", plot = p_vital_status, 
 #   scale_fill_brewer(palette = "Set3") +
 #   coord_cartesian(ylim = c(-10, 10)) +  # Limites de l'axe y
 #   scale_y_continuous(breaks = seq(-10, 10, by = 5))  # Incréments sur l'axe y
-# ggsave("D:/path_to_folder/boxplot_vital_status.png", plot = p_vitality, width = 10, height = 6)
+# ggsave("plots/boxplot_vital_status.png", plot = p_vitality, width = 10, height = 6)
 
 # Perform the Wilcoxon test for the different combinations
 
@@ -118,18 +122,21 @@ print(wilcox_test_result_1)
 
 # print(wilcox_test_result_2)
 
-# Data summary with average, median, standard deviation, minimum and maximum
+all_data <- as_tibble(all_data)
+
+# Data summary by level (level)
 summary_data_level <- all_data %>%
-  group_by(Level) %>%
-  summarize(
+  dplyr::group_by(Level) %>% # Use DPLYR explicitly to avoid conflicts
+  dplyr::summarize(
     mean_variation = mean(Delta_Heart_Rate, na.rm = TRUE),
     median_variation = median(Delta_Heart_Rate, na.rm = TRUE),
     sd_variation = sd(Delta_Heart_Rate, na.rm = TRUE)
   )
 
+# Summary of data by vital status (status)
 summary_data_status <- all_data %>%
-  group_by(Status) %>%
-  summarize(
+  dplyr::group_by(Status) %>%
+  dplyr::summarize(
     mean_variation = mean(Delta_Heart_Rate, na.rm = TRUE),
     median_variation = median(Delta_Heart_Rate, na.rm = TRUE),
     sd_variation = sd(Delta_Heart_Rate, na.rm = TRUE)
