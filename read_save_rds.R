@@ -7,9 +7,7 @@ if (!dir.exists("data_rds")) {
 if (!dir.exists("data_rds/E4_streams")) {
     dir.create("data_rds/E4_streams")
 }
-if (!dir.exists("plots")) {
-    dir.create("plots")
-}
+
 
 # Load the data
 base_path <- "data_csv/E4 streams"

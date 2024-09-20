@@ -16,7 +16,9 @@ base_path <- "data_rds/E4_streams"
 if (!dir.exists("cleaned_data")) {
   dir.create("cleaned_data", recursive = TRUE)
 }
-
+if (!dir.exists("plots")) {
+    dir.create("plots")
+}
 videos_timecodes <- readRDS("data_rds/videos_timecodes.rds")
 participants_data <- readRDS("data_rds/participants.rds")
 stream_files <- list.files(base_path, full.names = TRUE, recursive = TRUE)
